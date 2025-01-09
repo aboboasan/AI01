@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
-import Input from '../common/Input';
-import Button from '../common/Button';
-
-interface SearchResult {
-  id: string;
-  title: string;
-  court: string;
-  date: string;
-  summary: string;
-}
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, CalendarIcon, MapPinIcon, ScaleIcon, DocumentTextIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { Input } from '../common/Input';
+import { Button } from '../common/Button';
+import { searchLegalCases, getRandomLegalInfo, type LegalCase } from '../../services/api';
 
 const CaseSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,31 +11,26 @@ const CaseSearch: React.FC = () => {
     dateRange: '',
     caseType: ''
   });
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<LegalCase[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: 实现实际的搜索逻辑
-    setTimeout(() => {
-      setResults([
-        {
-          id: '1',
-          title: '张三诉李四合同纠纷案',
-          court: '北京市第一中级人民法院',
-          date: '2023-12-01',
-          summary: '本案涉及合同履行过程中的违约责任认定问题...'
-        },
-        // 更多模拟数据
-      ]);
+    try {
+      // 在实际API连接前，使用随机案例作为示例
+      const randomCases = getRandomLegalInfo(5);
+      setResults(randomCases);
+    } catch (error) {
+      console.error('搜索失败:', error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-6 border-b border-gray-700">
+      <div className="p-6 border-b border-gray-200 bg-white">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="flex space-x-4">
             <div className="flex-1">
@@ -64,7 +52,7 @@ const CaseSearch: React.FC = () => {
           
           <div className="flex space-x-4">
             <select
-              className="bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm"
+              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.court}
               onChange={(e) => setFilters({ ...filters, court: e.target.value })}
             >
@@ -75,7 +63,7 @@ const CaseSearch: React.FC = () => {
             </select>
             
             <select
-              className="bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm"
+              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.dateRange}
               onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
             >
@@ -86,7 +74,7 @@ const CaseSearch: React.FC = () => {
             </select>
             
             <select
-              className="bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm"
+              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.caseType}
               onChange={(e) => setFilters({ ...filters, caseType: e.target.value })}
             >
@@ -99,24 +87,54 @@ const CaseSearch: React.FC = () => {
         </form>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
         {results.map((result) => (
           <div
             key={result.id}
-            className="bg-gray-700 rounded-lg p-4 mb-4 hover:bg-gray-600 transition-colors cursor-pointer"
+            className="bg-white rounded-lg p-6 mb-4 shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-semibold text-white mb-2">{result.title}</h3>
-            <div className="flex items-center text-sm text-gray-300 mb-2">
-              <span>{result.court}</span>
-              <span className="mx-2">•</span>
-              <span>{result.date}</span>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">{result.title}</h3>
+              <span className="text-sm font-medium text-gray-500">{result.reference}</span>
             </div>
-            <p className="text-gray-400 text-sm">{result.summary}</p>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="flex items-center text-gray-600">
+                <ScaleIcon className="h-5 w-5 mr-2" />
+                <span>{result.court}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <CalendarIcon className="h-5 w-5 mr-2" />
+                <span>{result.date}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <MapPinIcon className="h-5 w-5 mr-2" />
+                <span>{result.location}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
+                <span>{result.caseType}</span>
+              </div>
+            </div>
+
+            <p className="text-gray-600 mb-4">{result.summary}</p>
+            
+            <div className="flex justify-end">
+              <a
+                href={result.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-blue-600 hover:text-blue-800"
+              >
+                <LinkIcon className="h-5 w-5 mr-1" />
+                查看完整判决书
+              </a>
+            </div>
           </div>
         ))}
         
         {results.length === 0 && !isLoading && (
-          <div className="text-center text-gray-400 mt-8">
+          <div className="text-center text-gray-500 mt-8">
             <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>输入关键词开始搜索案例</p>
           </div>

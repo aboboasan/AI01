@@ -2,19 +2,28 @@ import React from 'react';
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg';
-  color?: string;
+  className?: string;
 }
 
-const Loading: React.FC<LoadingProps> = ({ size = 'md', color = 'text-white' }) => {
+export const Loading: React.FC<LoadingProps> = ({ 
+  size = 'md',
+  className = ''
+}) => {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8'
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8'
   };
 
   return (
-    <div className="flex justify-center items-center">
-      <div className={`animate-spin rounded-full border-2 border-gray-200 border-t-transparent ${sizeClasses[size]} ${color}`}></div>
+    <div className={`inline-block ${className}`}>
+      <div
+        className={`
+          ${sizeClasses[size]}
+          border-2 border-gray-300 border-t-blue-500
+          rounded-full animate-spin
+        `}
+      />
     </div>
   );
 };

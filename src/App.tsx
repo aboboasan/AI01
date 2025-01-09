@@ -11,7 +11,6 @@ import {
   PlusIcon,
   TrashIcon,
   Bars3Icon,
-  ChevronDownIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 
