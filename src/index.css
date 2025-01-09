@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-gray-900;
+  }
+}
+
+@layer components {
+  .card-3d {
+    @apply transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg;
+  }
+  
+  .glass-effect {
+    @apply bg-white bg-opacity-10 backdrop-blur-md;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+} 
