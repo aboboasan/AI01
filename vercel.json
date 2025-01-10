@@ -28,8 +28,9 @@
     }
   ],
   "env": {
-    "REACT_APP_DEEPSEEK_API_KEY": "@deepseek_api_key",
+    "REACT_APP_DEEPSEEK_API_KEY": "sk-4c27205edf134b53b269485c766f08d5",
     "REACT_APP_DEEPSEEK_API_URL": "https://api.deepseek.com",
+    "ALLOWED_ORIGIN": "https://ai-legal-assistant.vercel.app",
     "NODE_ENV": "production"
   }
 } 
