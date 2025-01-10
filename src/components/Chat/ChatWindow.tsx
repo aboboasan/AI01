@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
+import { Input } from '../common/Input';
 
 interface ChatWindowProps {
   chatId?: string | null;
@@ -133,13 +134,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
               <div className="max-w-3xl mx-auto">
                 <form onSubmit={handleSubmit} className="flex space-x-4">
                   <div className="flex-1 overflow-hidden">
-                    <input
-                      type="text"
+                    <Input
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder="输入您的问题..."
                       className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 focus:ring-0 shadow-lg"
                       disabled={isLoading}
+                      multiline
                     />
                   </div>
                   <button
@@ -211,13 +212,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
         <div className="border-t border-gray-100 p-4 bg-white">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex space-x-4">
             <div className="flex-1 overflow-hidden">
-              <input
-                type="text"
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="输入您的问题..."
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 focus:ring-0 shadow-lg"
                 disabled={isLoading}
+                multiline
               />
             </div>
             <button

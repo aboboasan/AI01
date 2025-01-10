@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 16px;
+  }
+  
   body {
     @apply antialiased text-gray-900;
+  }
+
+  h1 {
+    @apply text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
+  }
+
+  p {
+    @apply text-base leading-relaxed;
   }
 }
 
@@ -15,6 +35,31 @@
   
   .glass-effect {
     @apply bg-white bg-opacity-10 backdrop-blur-md;
+  }
+
+  /* 导航和菜单项字体 */
+  .nav-item {
+    @apply text-lg font-medium;
+  }
+
+  /* 按钮文字 */
+  .btn {
+    @apply text-base font-medium;
+  }
+
+  /* 输入框文字 */
+  .input {
+    @apply text-base;
+  }
+
+  /* 卡片标题 */
+  .card-title {
+    @apply text-xl font-semibold;
+  }
+
+  /* 卡片内容 */
+  .card-content {
+    @apply text-base;
   }
 }
 

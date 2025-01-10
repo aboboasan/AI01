@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
   <rect width="32" height="32" rx="8" fill="#3B82F6"/>
-  <path d="M16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8ZM13 18.5L11 14.5L13 10.5H19L21 14.5L19 18.5H13Z" fill="white"/>
+  
+  <!-- 天平底座 -->
+  <path d="M16 24H8v-2h16v2h-8z" fill="white"/>
+  
+  <!-- 天平支柱 -->
+  <rect x="15" y="14" width="2" height="10" fill="white"/>
+  
+  <!-- 天平横杆 -->
+  <rect x="8" y="13" width="16" height="2" fill="white"/>
+  
+  <!-- 左盘 -->
+  <path d="M7 13a5 5 0 0110 0h-2a3 3 0 00-6 0H7z" fill="white"/>
+  
+  <!-- 右盘 -->
+  <path d="M15 13a5 5 0 0110 0h-2a3 3 0 00-6 0h-2z" fill="white"/>
+  
+  <!-- AI 符号 -->
+  <path d="M13 8l1.5 2h3L19 8h-6z" fill="white" opacity="0.9"/>
+  <circle cx="16" cy="6" r="1.5" fill="white" opacity="0.9"/>
+  
+  <!-- 电路图案 -->
+  <path d="M10 11h2m8 0h2M16 6v2" stroke="white" strokeWidth="0.5" opacity="0.6"/>
 </svg> 

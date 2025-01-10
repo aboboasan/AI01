@@ -35,9 +35,11 @@ const CaseSearch: React.FC = () => {
           <div className="flex space-x-4">
             <div className="flex-1">
               <Input
-                placeholder="输入关键词搜索案例..."
+                placeholder="请输入要检索的法律问题或关键词"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                multiline
+                className="flex-1"
                 icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
               />
             </div>

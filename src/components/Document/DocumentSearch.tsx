@@ -139,10 +139,11 @@ export const DocumentSearch: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4">法律检索</h2>
         <div className="flex gap-4">
           <Input
+            placeholder="请输入要搜索的法律文档内容"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="请输入要检索的法律问题或关键词"
-            className="flex-1"
+            multiline
+            className="mb-4"
             icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
           />
           <Button

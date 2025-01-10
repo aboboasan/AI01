@@ -3,6 +3,7 @@ import { CloudArrowUpIcon, PaperAirplaneIcon, ArrowPathIcon } from '@heroicons/r
 import { analyzeContract, chatCompletion, ChatMessage } from '../../services/api';
 import Button from '../common/Button';
 import ErrorMessage from '../common/ErrorMessage';
+import { Input } from '../common/Input';
 const mammoth = require('mammoth');
 
 interface Message {
@@ -280,26 +281,36 @@ const ContractReview: React.FC = () => {
 
       {messages.length > 0 && (
         <div className="border-t border-gray-100 p-4 bg-white">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex space-x-4">
-            <div className="flex-1">
-              <input
-                type="text"
+          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex space-x-4">
+            <div className="flex-1 overflow-hidden">
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="输入您的问题..."
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 focus:ring-0 shadow-lg"
                 disabled={isLoading}
+                multiline
               />
             </div>
-            <Button
+            <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              isLoading={isLoading}
-              icon={<PaperAirplaneIcon className="h-5 w-5" />}
+              className={`
+                px-4 py-2 rounded-lg flex items-center justify-center shadow-lg
+                ${input.trim() && !isLoading
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }
+              `}
             >
-              发送
-            </Button>
+              <PaperAirplaneIcon className="h-5 w-5" />
+            </button>
           </form>
+          <div className="max-w-3xl mx-auto mt-2">
+            <p className="text-xs text-gray-400 px-4">
+              按Enter发送，按Shift+Enter换行
+            </p>
+          </div>
         </div>
       )}
     </div>

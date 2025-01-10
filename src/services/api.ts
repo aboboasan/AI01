@@ -1,39 +1,118 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://api.deepseek.com/v1';
-const API_KEY = 'sk-4c27205edf134b53b269485c766f08d5';
+// 系统提示词定义
+const GENERAL_SYSTEM_PROMPT = `作为您的私人专属法律顾问，我将始终：
+- 站在您的立场思考和分析问题
+- 主动识别对您不利的情况和风险
+- 提供对您最有利的解决方案
+
+我的工作方式：
+1. 主动思维：
+   - 预判可能的法律风险
+   - 提供防范建议
+   - 设计保护策略
+
+2. 分析方法：
+   - 优先考虑您的权益
+   - 识别潜在风险和陷阱
+   - 提供具体可行的方案
+
+3. 沟通特点：
+   - 使用清晰易懂的语言
+   - 直接指出关键问题
+   - 通过提问深入了解情况
+
+每次回答都会：
+1. 指出存疑之处和风险
+2. 分析可能的法律后果
+3. 提供对您最有利的建议
+4. 补充其他注意事项`;
+
+const CONTRACT_SYSTEM_PROMPT = `作为您的私人合同顾问，我将以下列格式提供分析：
+
+# 合同风险分析报告
+
+## **一、主要风险点清单**
+**高风险条款**：[具体内容]
+**潜在风险**：[具体内容]
+**程序性问题**：[具体内容]
+
+## **二、具体条款分析**
+### **1. [条款名称]**
+**条款原文**：[具体内容]
+**风险说明**：[具体内容]
+**法律依据**：[具体内容]
+**影响程度**：[具体内容]
+
+## **三、修改建议**
+### **1. [问题条款]**
+**现有问题**：[具体内容]
+**修改建议**：[具体内容]
+**参考用语**：[具体内容]
+
+## **四、谈判策略**
+**重点议题**：[具体内容]
+**谈判要点**：[具体内容]
+**底线建议**：[具体内容]
+
+## **五、补充建议**
+**特别提醒**：[具体内容]
+**建议增加**：[具体内容]
+**其他说明**：[具体内容]
+
+分析重点：
+1. 重点关注对您不利的条款
+2. 识别责任和义务的不公平分配
+3. 审查违约责任和赔偿条款
+4. 发现程序性缺陷和违规点
+5. 提供具体可行的修改方案
+
+请提供合同内容，我将从您的角度进行全面分析。`;
+
+const SEARCH_SYSTEM_PROMPT = `作为您的案例检索顾问，我将：
+1. 案例分析重点：
+   - 对您有利的判例
+   - 类似案件的胜诉策略
+   - 法院的倾向性意见
+   - 可能的抗辩理由
+
+2. 检索方向：
+   - 相似案情的判例
+   - 对您有利的法律适用
+   - 成功案例的关键因素
+   - 需要规避的风险点
+
+3. 实用建议：
+   - 案例对您的参考价值
+   - 具体的应用建议
+   - 需要注意的差异点
+   - 策略性建议
+
+我将按照以下结构提供分析：
+1. 相关案例摘要
+2. 对您案件的借鉴价值
+3. 具体应用建议
+4. 风险提示
+5. 补充说明`;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:3002/api',
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${API_KEY}`,
+    'Content-Type': 'application/json'
   },
   timeout: 60000,
 });
-
-// 添加请求拦截器
-api.interceptors.request.use(
-  (config) => {
-    // 确保每个请求都带有最新的 token
-    config.headers.Authorization = `Bearer ${API_KEY}`;
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // 添加响应拦截器
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      console.error('API密钥无效或已过期');
+      console.error('认证失败');
     } else if (error.response?.status === 429) {
-      console.error('API调用次数已达到限制');
+      console.error('请求次数超限');
     } else if (error.response?.status === 500) {
-      console.error('服务器内部错误');
+      console.error('服务器错误');
     }
     return Promise.reject(error);
   }
@@ -120,12 +199,23 @@ export const chatCompletion = async (messages: ChatMessage[]) => {
       throw new Error('消息内容不能为空');
     }
 
-    const response = await api.post('/chat/completions', {
-      model: 'deepseek-chat',
-      messages,
-      temperature: 0.7,
-      max_tokens: 2000,
-      stream: false
+    // 添加系统提示词
+    const systemMessage: ChatMessage = {
+      role: 'system',
+      content: GENERAL_SYSTEM_PROMPT
+    };
+
+    const allMessages = [systemMessage, ...messages];
+
+    const response = await api.post('/chat', {
+      endpoint: '/chat/completions',
+      data: {
+        model: 'deepseek-chat',
+        messages: allMessages,
+        temperature: 0.7,
+        max_tokens: 2000,
+        stream: false
+      }
     });
 
     if (response.data && response.data.choices && response.data.choices[0]) {
@@ -148,11 +238,11 @@ export const analyzeContract = async (content: string) => {
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: '你是一位专业的法律顾问，请对提供的合同内容进行分析。请注意以下几点：1. 合同的主要条款和核心内容 2. 双方的权利和义务 3. 可能存在的法律风险 4. 具体的改进建议'
+        content: CONTRACT_SYSTEM_PROMPT
       },
       {
         role: 'user',
-        content
+        content: `请分析以下合同内容，指出对我不利的条款和潜在风险：\n\n${content}`
       }
     ];
 
@@ -173,20 +263,11 @@ export const searchLegalCases = async (query: string) => {
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `你是一位专业的法律检索助手。请根据用户的查询提供相关的法律案例分析，包含以下要素：
-1. 案件标题
-2. 审理法院
-3. 判决日期
-4. 案件地点
-5. 案件类型
-6. 案号
-7. 判决要点
-8. 法律依据
-请确保分析准确、全面且实用。`
+        content: SEARCH_SYSTEM_PROMPT
       },
       {
         role: 'user',
-        content: `请帮我查找与以下问题相关的法律案例和法规依据：${query}`
+        content: `请帮我查找与以下问题相关的案例，并分析对我最有利的参考价值：${query}`
       }
     ];
 
