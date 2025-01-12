@@ -137,26 +137,29 @@ const MobileChatView: React.FC<MobileChatViewProps> = ({
           e.preventDefault(); 
           onSubmit(e); 
         }} className="flex items-end space-x-3">
-          <div className="flex-1 min-h-[48px]">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={onInputChange}
-              onKeyDown={onKeyDown}
-              placeholder="请输入您的问题..."
-              className="w-full resize-none rounded-lg border border-gray-200 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              style={{
-                height: textareaHeight,
-                maxHeight: '150px'
-              }}
-            />
+          <div className="flex-1">
+            <div className="relative min-h-[56px] bg-white rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={onInputChange}
+                onKeyDown={onKeyDown}
+                placeholder="请输入您的问题..."
+                className="w-full h-full resize-none rounded-lg px-4 py-3 text-base focus:outline-none bg-transparent"
+                style={{
+                  minHeight: '56px',
+                  height: textareaHeight,
+                  maxHeight: '150px'
+                }}
+              />
+            </div>
           </div>
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className={`px-6 py-3 rounded-lg text-base font-medium ${
+            className={`h-[56px] px-8 rounded-lg text-base font-medium flex items-center justify-center min-w-[100px] ${
               input.trim() && !isLoading
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'bg-gray-100 text-gray-400'
             } transition-colors duration-200`}
           >
