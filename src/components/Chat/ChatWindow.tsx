@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
-import MobileHeader from '../common/MobileHeader';
+import MobileHeader, { MobileComponents } from '../common/MobileHeader';
 import FeatureCard from '../common/FeatureCard';
 
 const ChatWindow: React.FC = () => {
