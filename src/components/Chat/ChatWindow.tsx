@@ -127,58 +127,8 @@ const ChatWindow: React.FC = () => {
 
   // 渲染移动端界面
   const renderMobileView = () => {
-    if (messages.length === 0) {
-      return (
-        <div className="flex flex-col h-[90vh] bg-gray-50">
-          <div className="flex-none px-4 py-3 bg-white border-b border-gray-200">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <h1 className="text-xl font-semibold text-gray-900">AI法律助手</h1>
-                <p className="text-sm text-gray-600">正在为您服务</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3">
-                <FeatureCard
-                  icon="💬"
-                  title="分析案情提供建议"
-                  description="智能法律顾问为您解答各类法律问题，提供专业建议"
-                  onClick={() => handleFeatureClick('我需要法律咨询服务，请问您能为我提供哪些帮助？')}
-                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
-                />
-                <FeatureCard
-                  icon="📝"
-                  title="解释法律术语"
-                  description="快速解释各类法律术语和概念"
-                  onClick={() => handleFeatureClick('请帮我解释一些法律术语的具体含义。')}
-                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
-                />
-                <FeatureCard
-                  icon="🔍"
-                  title="评估法律风险"
-                  description="评估潜在法律风险，提供防范建议"
-                  onClick={() => handleFeatureClick('请帮我评估一下这个情况的法律风险。')}
-                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
-                />
-                <FeatureCard
-                  icon="📋"
-                  title="推荐解决方案"
-                  description="针对具体问题推荐可行的解决方案"
-                  onClick={() => handleFeatureClick('我遇到了一个法律问题，请推荐可行的解决方案。')}
-                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div className="flex flex-col h-[90vh]">
+      <div className="flex flex-col h-screen">
         <MobileHeader 
           title="AI法律助手" 
           subtitle="正在为您服务"
@@ -188,37 +138,46 @@ const ChatWindow: React.FC = () => {
           }}
         />
         <div className="flex-1 overflow-y-auto px-4 pt-4 pb-20 bg-gray-50">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-start mb-6 ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              {message.role === 'assistant' && (
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                  <span className="text-blue-600 text-sm font-medium">AI</span>
-                </div>
-              )}
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-gray-500">
+                <p className="mb-4">您好，我是您的AI法律助手</p>
+                <p>请输入您的法律问题，我会为您提供专业的建议</p>
+              </div>
+            </div>
+          ) : (
+            messages.map((message, index) => (
               <div
-                className={`rounded-2xl px-4 py-3 max-w-[85%] ${
-                  message.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-800 border border-gray-200'
+                key={index}
+                className={`flex items-start mb-6 ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <div className="text-xs mt-1 opacity-70">
-                  {new Date(message.timestamp).toLocaleTimeString()}
+                {message.role === 'assistant' && (
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                    <span className="text-blue-600 text-sm font-medium">AI</span>
+                  </div>
+                )}
+                <div
+                  className={`rounded-2xl px-4 py-3 max-w-[85%] ${
+                    message.role === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-800 border border-gray-200'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div className="text-xs mt-1 opacity-70">
+                    {new Date(message.timestamp).toLocaleTimeString()}
+                  </div>
                 </div>
+                {message.role === 'user' && (
+                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center ml-2">
+                    <span className="text-gray-600 text-sm">我</span>
+                  </div>
+                )}
               </div>
-              {message.role === 'user' && (
-                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center ml-2">
-                  <span className="text-gray-600 text-sm">我</span>
-                </div>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </div>
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
           <form onSubmit={handleSubmit} className="flex items-center space-x-2">
