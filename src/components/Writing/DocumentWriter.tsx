@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { DocumentTextIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { chatCompletion } from '../../services/api';
+import { DocumentTextIcon, ClipboardIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { chatCompletion, ChatMessage } from '../../services/api';
 
 interface FormData {
   documentType: string;
@@ -9,6 +9,15 @@ interface FormData {
   claims: string;
 }
 
+const documentTypes = [
+  { id: '起诉状', name: '起诉状', description: '向法院提起诉讼的书面文书' },
+  { id: '答辩状', name: '答辩状', description: '对原告起诉请求进行答辩的书面文书' },
+  { id: '上诉状', name: '上诉状', description: '不服一审判决向上级法院提起上诉的文书' },
+  { id: '仲裁申请书', name: '仲裁申请书', description: '向仲裁机构申请仲裁的书面文书' },
+  { id: '和解协议', name: '和解协议', description: '双方达成和解的书面协议' },
+  { id: '民事调解书', name: '民事调解书', description: '经法院调解达成的协议文书' }
+];
+
 const DocumentWriter: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     documentType: '',
@@ -16,83 +25,62 @@ const DocumentWriter: React.FC = () => {
     caseInfo: '',
     claims: ''
   });
+  const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
-  const documentTypes = [
-    { id: 'complaint', name: '起诉状', description: '向法院提起诉讼的法律文书' },
-    { id: 'defense', name: '答辩状', description: '对原告起诉请求进行答辩的法律文书' },
-    { id: 'appeal', name: '上诉状', description: '不服一审判决向上级法院提起上诉的法律文书' },
-    { id: 'statement', name: '陈述意见', description: '对案件相关事实和证据发表意见的法律文书' }
-  ];
-
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    setError('');
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement | HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const generatePrompt = (data: FormData) => {
-    const documentTypeText = documentTypes.find(type => type.id === data.documentType)?.name || data.documentType;
+  const handleGenerate = async () => {
+    if (!formData.documentType || !formData.partyInfo.trim() || !formData.caseInfo.trim() || !formData.claims.trim()) {
+      setError('请填写完整的文书信息');
+      return;
+    }
     
-    return `请帮我起草一份${documentTypeText}，具体信息如下：
-当事人信息：${data.partyInfo}
-案件事实与理由：${data.caseInfo}
-诉讼请求：${data.claims}
-
-请按照以下要求起草：
-1. 严格遵守中国法律文书的格式规范
-2. 使用正式的法律术语和表达方式
-3. 确保文书结构完整，包括标题、正文和落款等必要部分
-4. 根据提供的案件事实和理由，引用相关法律条款
-5. 语言要准确、严谨、专业
-
-请直接生成文书内容，无需其他解释。`;
-  };
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // 表单验证
-    if (!formData.documentType) {
-      setError('请选择文书类型');
-      return;
-    }
-    if (!formData.partyInfo.trim()) {
-      setError('请填写当事人信息');
-      return;
-    }
-    if (!formData.caseInfo.trim()) {
-      setError('请填写案件事实与理由');
-      return;
-    }
-    if (!formData.claims.trim()) {
-      setError('请填写诉讼请求');
-      return;
-    }
-
     setIsGenerating(true);
     setError('');
 
     try {
-      const prompt = generatePrompt(formData);
-      const response = await chatCompletion([
+      const messages: ChatMessage[] = [
         {
           role: 'system',
-          content: '你是一位专业的中国法律文书起草专家，精通各类法律文书的格式规范和写作要求。请严格按照中国法律文书的标准格式进行写作。'
+          content: `作为您的专业法律文书撰写助手，我将帮助您生成最有利于维护您权益的法律文书：
+
+1. 权益保护：确保文书最大程度维护您的合法权益
+2. 专业规范：严格遵循法律文书的格式规范和用语要求
+3. 论据充分：援引相关法律法规，强化文书说服力
+4. 重点突出：清晰表达诉求，突出对您有利的关键点
+5. 严谨完整：确保文书要素完整，表述严谨准确
+
+我将：
+- 根据您提供的信息，选择最合适的文书模板
+- 使用最新的法律依据支持您的诉求
+- 突出对您有利的事实和证据
+- 采用最有说服力的论述方式
+- 确保文书格式规范，用语专业
+
+请提供案件相关信息，我会为您生成最专业的法律文书。`
         },
         {
           role: 'user',
-          content: prompt
+          content: `
+            文书类型：${formData.documentType}
+            当事人信息：${formData.partyInfo}
+            案件事实：${formData.caseInfo}
+            诉讼请求：${formData.claims}
+          `
         }
-      ]);
+      ];
 
+      const response = await chatCompletion(messages);
       setGeneratedContent(response.content);
-    } catch (err) {
-      console.error('生成文书时出错:', err);
+    } catch (error) {
+      console.error('文书生成失败:', error);
       setError('生成文书时出现错误，请稍后重试');
     } finally {
       setIsGenerating(false);
@@ -101,137 +89,174 @@ const DocumentWriter: React.FC = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedContent)
-      .then(() => alert('已复制到剪贴板'))
-      .catch(() => alert('复制失败，请手动复制'));
+      .then(() => {
+        const copyButton = document.getElementById('copy-button');
+        if (copyButton) {
+          copyButton.textContent = '已复制';
+          setTimeout(() => {
+            copyButton.textContent = '复制文书';
+          }, 2000);
+        }
+      })
+      .catch(() => setError('复制失败，请手动复制'));
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="flex-1 overflow-y-auto p-4">
+    <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-4xl mx-auto">
+          {/* 欢迎区域 */}
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-medium text-gray-900 mb-2">
+            <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
+              <DocumentTextIcon className="h-12 w-12 text-blue-600" />
+            </div>
+            <h2 className="text-3xl font-semibold text-gray-800 mb-3">
               智能文书生成
             </h2>
-            <p className="text-gray-500">
-              快速生成专业的法律文书
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              选择文书类型，填写相关信息，快速生成规范的法律文书
             </p>
           </div>
 
-          <form onSubmit={handleGenerate} className="space-y-6">
-            {/* 文书类型选择 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                选择文书类型
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {documentTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => handleInputChange('documentType', type.id)}
-                    className={`
-                      p-4 rounded-lg border text-left transition-colors
-                      ${formData.documentType === type.id
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    <DocumentTextIcon className="h-6 w-6 text-gray-400 mb-2" />
-                    <div className="font-medium mb-1">{type.name}</div>
-                    <div className="text-sm text-gray-500">{type.description}</div>
-                  </button>
-                ))}
+          {/* 表单区域 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="space-y-6">
+              {/* 文书类型选择 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  文书类型
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {documentTypes.map((type) => (
+                    <label
+                      key={type.id}
+                      className={`
+                        relative flex flex-col p-4 cursor-pointer rounded-xl border transition-all
+                        ${formData.documentType === type.id
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="documentType"
+                        value={type.id}
+                        checked={formData.documentType === type.id}
+                        onChange={handleInputChange}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium text-gray-900">
+                        {type.name}
+                      </span>
+                      <span className="mt-1 text-xs text-gray-500">
+                        {type.description}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* 当事人信息 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                当事人信息
-              </label>
-              <textarea
-                value={formData.partyInfo}
-                onChange={(e) => handleInputChange('partyInfo', e.target.value)}
-                placeholder="请填写当事人的基本信息（姓名/名称、住所地等）..."
-                rows={3}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-              />
-            </div>
-
-            {/* 案件事实与理由 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                案件事实与理由
-              </label>
-              <textarea
-                value={formData.caseInfo}
-                onChange={(e) => handleInputChange('caseInfo', e.target.value)}
-                placeholder="请详细描述案件的基本事实和法律依据..."
-                rows={6}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-              />
-            </div>
-
-            {/* 诉讼请求 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                诉讼请求
-              </label>
-              <textarea
-                value={formData.claims}
-                onChange={(e) => handleInputChange('claims', e.target.value)}
-                placeholder="请列明具体的诉讼请求..."
-                rows={3}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-              />
-            </div>
-
-            {/* 错误提示 */}
-            {error && (
-              <div className="text-red-500 text-sm">
-                {error}
+              {/* 当事人信息 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  当事人信息
+                </label>
+                <textarea
+                  name="partyInfo"
+                  value={formData.partyInfo}
+                  onChange={handleInputChange}
+                  placeholder="请输入当事人的基本信息，包括姓名、身份证号、联系方式等..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                  rows={4}
+                />
               </div>
-            )}
 
-            {/* 生成按钮 */}
-            <button
-              type="submit"
-              disabled={isGenerating}
-              className={`
-                w-full py-3 rounded-lg flex items-center justify-center space-x-2
-                ${isGenerating
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                }
-              `}
-            >
-              {isGenerating ? (
-                <>
-                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                  <span>生成中...</span>
-                </>
-              ) : (
-                <span>生成文书</span>
+              {/* 案件事实 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  案件事实
+                </label>
+                <textarea
+                  name="caseInfo"
+                  value={formData.caseInfo}
+                  onChange={handleInputChange}
+                  placeholder="请详细描述案件的基本事实、经过和相关证据..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                  rows={6}
+                />
+              </div>
+
+              {/* 诉讼请求 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  诉讼请求
+                </label>
+                <textarea
+                  name="claims"
+                  value={formData.claims}
+                  onChange={handleInputChange}
+                  placeholder="请输入具体的诉讼请求或主张..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                  rows={4}
+                />
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-2">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
+
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className={`
+                  w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all
+                  ${!isGenerating
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                {isGenerating ? (
+                  <>
+                    <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                    <span className="font-medium">生成中...</span>
+                  </>
+                ) : (
+                  <>
+                    <DocumentTextIcon className="h-5 w-5" />
+                    <span className="font-medium">生成文书</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
 
           {/* 生成结果 */}
           {generatedContent && (
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">生成结果</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  生成结果
+                </h3>
                 <button
+                  id="copy-button"
                   onClick={handleCopy}
-                  className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:border-blue-300 transition-colors gap-2"
                 >
-                  复制内容
+                  <ClipboardIcon className="h-4 w-4" />
+                  复制文书
                 </button>
               </div>
-              <div className="whitespace-pre-wrap text-gray-800 font-mono">
-                {generatedContent}
+              <div className="prose prose-gray max-w-none">
+                <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-6 border border-gray-100">
+                  {generatedContent}
+                </pre>
               </div>
             </div>
           )}

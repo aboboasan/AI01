@@ -4,27 +4,74 @@ import { Input } from '../common/Input';
 import { Button } from '../common/Button';
 import { searchLegalCases, getRandomLegalInfo, type LegalCase } from '../../services/api';
 
+interface Filters {
+  court: string;
+  dateRange: string;
+  caseType: string;
+}
+
 const CaseSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
+  const [isSearching, setIsSearching] = useState(false);
+  const [results, setResults] = useState<LegalCase[]>([]);
+  const [error, setError] = useState('');
+  const [filters, setFilters] = useState<Filters>({
     court: '',
     dateRange: '',
     caseType: ''
   });
-  const [results, setResults] = useState<LegalCase[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleRandomSearch = async () => {
+    setIsSearching(true);
+    setError('');
     try {
-      // 在实际API连接前，使用随机案例作为示例
-      const randomCases = getRandomLegalInfo(5);
+      const randomCases = await getRandomLegalInfo();
       setResults(randomCases);
     } catch (error) {
       console.error('搜索失败:', error);
+      setError('获取案例失败，请重试');
     } finally {
-      setIsLoading(false);
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim() || isSearching) return;
+
+    setIsSearching(true);
+    setError('');
+    try {
+      const searchResults = await searchLegalCases(searchTerm);
+      // 应用筛选条件
+      const filteredResults = searchResults.filter(result => {
+        const courtMatch = !filters.court || result.court.includes(filters.court);
+        const typeMatch = !filters.caseType || result.caseType === filters.caseType;
+        
+        if (!filters.dateRange) return courtMatch && typeMatch;
+        
+        const caseDate = new Date(result.date);
+        const now = new Date();
+        const yearDiff = now.getFullYear() - caseDate.getFullYear();
+        
+        switch (filters.dateRange) {
+          case '1year':
+            return yearDiff <= 1 && courtMatch && typeMatch;
+          case '3years':
+            return yearDiff <= 3 && courtMatch && typeMatch;
+          case '5years':
+            return yearDiff <= 5 && courtMatch && typeMatch;
+          default:
+            return courtMatch && typeMatch;
+        }
+      });
+      
+      setResults(filteredResults);
+    } catch (error) {
+      console.error('搜索失败:', error);
+      setError('搜索失败，请重试');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -45,7 +92,7 @@ const CaseSearch: React.FC = () => {
             </div>
             <Button
               type="submit"
-              isLoading={isLoading}
+              isLoading={isSearching}
               icon={<AdjustmentsHorizontalIcon className="h-5 w-5" />}
             >
               筛选
@@ -59,9 +106,9 @@ const CaseSearch: React.FC = () => {
               onChange={(e) => setFilters({ ...filters, court: e.target.value })}
             >
               <option value="">所有法院</option>
-              <option value="supreme">最高人民法院</option>
-              <option value="high">高级人民法院</option>
-              <option value="intermediate">中级人民法院</option>
+              <option value="最高人民法院">最高人民法院</option>
+              <option value="高级人民法院">高级人民法院</option>
+              <option value="中级人民法院">中级人民法院</option>
             </select>
             
             <select
@@ -81,15 +128,21 @@ const CaseSearch: React.FC = () => {
               onChange={(e) => setFilters({ ...filters, caseType: e.target.value })}
             >
               <option value="">所有类型</option>
-              <option value="civil">民事案件</option>
-              <option value="criminal">刑事案件</option>
-              <option value="administrative">行政案件</option>
+              <option value="民事案件">民事案件</option>
+              <option value="刑事案件">刑事案件</option>
+              <option value="行政案件">行政案件</option>
             </select>
           </div>
         </form>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
+        
         {results.map((result) => (
           <div
             key={result.id}
@@ -135,7 +188,7 @@ const CaseSearch: React.FC = () => {
           </div>
         ))}
         
-        {results.length === 0 && !isLoading && (
+        {results.length === 0 && !isSearching && (
           <div className="text-center text-gray-500 mt-8">
             <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>输入关键词开始搜索案例</p>

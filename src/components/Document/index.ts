@@ -1,0 +1,1 @@
+export { default as DocumentSearch } from './DocumentSearch'; 
