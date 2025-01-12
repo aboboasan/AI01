@@ -118,46 +118,66 @@ const ChatWindow: React.FC = () => {
   const renderMobileView = () => {
     if (messages.length === 0) {
       return (
-        <div className="flex flex-col h-full">
-          <MobileHeader 
-            title="Lawbot AI" 
-            subtitle="专业的法律智能助手"
-          />
-          <div className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-3">
-              <div className="text-center mb-6">
-                <div className="inline-block p-2 bg-yellow-50 rounded-full mb-3 shadow-sm">
-                  <UserCircleIcon className="h-8 w-8 text-blue-500" />
-                </div>
-                <h2 className="text-base font-medium text-gray-700 mb-2 px-4">
-                  您的私人法律顾问，为您提供专业的法律咨询服务
-                </h2>
+        <div className="flex flex-col h-full bg-gray-50">
+          <div className="flex-none px-4 py-3 bg-white border-b border-gray-200">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <h1 className="text-xl font-semibold text-gray-900">Lawbot AI</h1>
+                <p className="text-sm text-gray-600">您的私人法律智能助手</p>
               </div>
-              
-              <div className="grid grid-cols-1 gap-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 shadow-sm border border-blue-200">
+                <h2 className="text-base font-medium text-gray-800 mb-2">
+                  智能法律顾问随时为您服务
+                </h2>
+                <p className="text-sm text-gray-600 mb-3">
+                  提供专业的法律咨询、文书生成、案例分析等服务
+                </p>
+                <div className="flex items-center gap-2 text-blue-600 text-sm font-medium">
+                  <span>开始咨询</span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
                 <FeatureCard
                   icon="💬"
                   title="专业解答法律问题"
                   description="智能法律顾问为您解答各类法律问题，提供专业建议"
                   onClick={() => handleFeatureClick('我需要法律咨询服务，请问您能为我提供哪些帮助？')}
+                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
                 />
                 <FeatureCard
                   icon="📝"
                   title="快速生成法律文书"
                   description="快速生成各类法律文书，包括合同、协议、诉讼文书等"
                   onClick={() => handleFeatureClick('我需要生成一份法律文书，请问您能为我提供哪些类型的文书模板？')}
+                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
                 />
                 <FeatureCard
                   icon="🔍"
                   title="海量案例检索"
                   description="海量案例库检索，找到与您情况相似的典型案例"
                   onClick={() => handleFeatureClick('我想查找相关的法律案例，请问您能帮我检索吗？')}
+                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
                 />
                 <FeatureCard
                   icon="📋"
                   title="智能合同审查"
                   description="智能分析合同条款，识别潜在风险，提供修改建议"
                   onClick={() => handleFeatureClick('我需要审查一份合同，请问您能为我分析合同条款吗？')}
+                  className="bg-white hover:bg-gray-50 shadow-sm hover:shadow transition-all"
                 />
               </div>
             </div>

@@ -5,6 +5,7 @@ interface FeatureCardProps {
   title: string;
   description: string;
   onClick: () => void;
+  className?: string;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
@@ -12,21 +13,23 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   title,
   description,
   onClick,
+  className = '',
 }) => {
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white rounded-xl p-4 border border-blue-100 shadow-sm
-        active:transform active:scale-95 transition-all duration-200
-        hover:border-blue-200 hover:shadow-md"
+      className={`w-full text-left p-4 rounded-xl border border-gray-200 ${className}`}
     >
-      <div className="flex items-start space-x-3">
-        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl">{icon}</span>
+      <div className="flex items-start gap-3">
+        <div className="flex-none text-2xl">{icon}</div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-medium text-gray-900 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
         </div>
-        <div className="flex-1 text-left">
-          <h3 className="text-base font-semibold text-gray-800 mb-1">{title}</h3>
-          <p className="text-xs text-gray-500 line-clamp-2">{description}</p>
+        <div className="flex-none text-gray-400">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </div>
       </div>
     </button>
