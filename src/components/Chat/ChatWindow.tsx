@@ -105,6 +105,21 @@ const ChatWindow: React.FC = () => {
     }
   };
 
+  // 处理功能卡片点击
+  const handleFeatureClick = (message: string) => {
+    setMessages([{
+      id: Date.now().toString(),
+      content: message,
+      role: 'user',
+      timestamp: new Date().toISOString()
+    }]);
+    
+    // 自动触发表单提交
+    setTimeout(() => {
+      handleSubmit(new Event('submit') as any);
+    }, 100);
+  };
+
   // 渲染移动端界面
   const renderMobileView = () => {
     if (messages.length === 0) {
@@ -130,37 +145,25 @@ const ChatWindow: React.FC = () => {
                   icon="💬"
                   title="专业解答法律问题"
                   description="智能法律顾问为您解答各类法律问题，提供专业建议"
-                  onClick={() => {
-                    setInput('我需要法律咨询服务');
-                    handleSubmit(new Event('submit') as any);
-                  }}
+                  onClick={() => handleFeatureClick('我需要法律咨询服务，请问您能为我提供哪些帮助？')}
                 />
                 <FeatureCard
                   icon="📝"
                   title="快速生成法律文书"
                   description="快速生成各类法律文书，包括合同、协议、诉讼文书等"
-                  onClick={() => {
-                    setInput('帮我生成法律文书');
-                    handleSubmit(new Event('submit') as any);
-                  }}
+                  onClick={() => handleFeatureClick('我需要生成一份法律文书，请问您能为我提供哪些类型的文书模板？')}
                 />
                 <FeatureCard
                   icon="🔍"
                   title="海量案例检索"
                   description="海量案例库检索，找到与您情况相似的典型案例"
-                  onClick={() => {
-                    setInput('查找相关法律案例');
-                    handleSubmit(new Event('submit') as any);
-                  }}
+                  onClick={() => handleFeatureClick('我想查找相关的法律案例，请问您能帮我检索吗？')}
                 />
                 <FeatureCard
                   icon="📋"
                   title="智能合同审查"
                   description="智能分析合同条款，识别潜在风险，提供修改建议"
-                  onClick={() => {
-                    setInput('审查合同内容');
-                    handleSubmit(new Event('submit') as any);
-                  }}
+                  onClick={() => handleFeatureClick('我需要审查一份合同，请问您能为我分析合同条款吗？')}
                 />
               </div>
             </div>
