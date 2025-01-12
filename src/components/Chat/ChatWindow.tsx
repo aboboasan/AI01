@@ -123,18 +123,18 @@ const ChatWindow: React.FC = () => {
             title="Lawbot AI" 
             subtitle="专业的法律智能助手"
           />
-          <div className="flex-1 overflow-y-auto px-4 py-6">
-            <div className="space-y-4">
-              <div className="text-center mb-8">
-                <div className="inline-block p-3 bg-yellow-50 rounded-full mb-4 shadow-md">
-                  <UserCircleIcon className="h-12 w-12 text-blue-500" />
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            <div className="space-y-3">
+              <div className="text-center mb-6">
+                <div className="inline-block p-2 bg-yellow-50 rounded-full mb-3 shadow-sm">
+                  <UserCircleIcon className="h-8 w-8 text-blue-500" />
                 </div>
-                <h2 className="text-lg font-medium text-gray-700 mb-2">
+                <h2 className="text-base font-medium text-gray-700 mb-2 px-4">
                   您的私人法律顾问，为您提供专业的法律咨询服务
                 </h2>
               </div>
               
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2">
                 <FeatureCard
                   icon="💬"
                   title="专业解答法律问题"
@@ -174,31 +174,31 @@ const ChatWindow: React.FC = () => {
           onBack={() => setMessages([])}
         />
         <div className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="max-w-lg mx-auto p-4 space-y-4">
+          <div className="max-w-lg mx-auto p-3 space-y-3">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-3 ${
+                className={`flex items-start gap-2 ${
                   message.role === 'user' ? 'flex-row-reverse' : ''
                 }`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
+                  className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
                     message.role === 'user'
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-yellow-50 border-blue-200'
                   }`}
                 >
                   {message.role === 'user' ? (
-                    <UserCircleIcon className="h-5 w-5 text-blue-500" />
+                    <UserCircleIcon className="h-4 w-4 text-blue-500" />
                   ) : (
-                    <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   )}
                 </div>
                 <div
-                  className={`flex-1 rounded-2xl px-4 py-3 shadow-sm border ${
+                  className={`flex-1 rounded-xl px-3 py-2 shadow-sm border ${
                     message.role === 'user'
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-white border-blue-200'
@@ -216,33 +216,33 @@ const ChatWindow: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
         </div>
-        <div className="border-t border-gray-200 bg-white px-4 py-3 shadow-lg">
-          <form onSubmit={handleSubmit}>
+        <div className="border-t border-gray-200 bg-white px-3 py-2">
+          <form onSubmit={handleSubmit} className="relative">
             <div className="flex items-end gap-2">
-              <div className="flex-1">
+              <div className="flex-1 min-h-[44px]">
                 <textarea
                   ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="请输入您的法律问题..."
-                  className="w-full p-3 border border-gray-200 rounded-xl resize-none 
+                  className="w-full p-2 border border-gray-200 rounded-xl resize-none 
                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    text-base placeholder:text-gray-400"
+                    text-sm placeholder:text-gray-400 min-h-[44px]"
                   rows={1}
                 />
               </div>
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white 
+                className="flex items-center justify-center h-11 w-11 rounded-xl bg-blue-600 text-white 
                   disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 
-                  transition-colors shadow-lg"
+                  transition-colors shadow-md"
               >
                 {isLoading ? (
-                  <ArrowPathIcon className="h-6 w-6 animate-spin" />
+                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
                 ) : (
-                  <PaperAirplaneIcon className="h-6 w-6" />
+                  <PaperAirplaneIcon className="h-5 w-5" />
                 )}
               </button>
             </div>
