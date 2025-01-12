@@ -107,20 +107,20 @@ const ChatWindow: React.FC = () => {
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
       {/* 欢迎消息 */}
       {messages.length === 0 && (
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center max-w-2xl bg-white rounded-2xl shadow-lg p-8 border border-blue-200">
+        <div className="flex-1 flex items-center justify-center p-4 md:p-6">
+          <div className="text-center w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-lg p-4 md:p-8 border border-blue-200">
             <div className="inline-block p-3 bg-yellow-50 rounded-full mb-4 shadow-md">
-              <UserCircleIcon className="h-12 w-12 text-blue-500" />
+              <UserCircleIcon className="h-8 w-8 md:h-12 md:w-12 text-blue-500" />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
               您的私人法律顾问
             </h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed">
               请描述您的法律问题，我会根据专业知识为您提供详细的建议和解决方案。
               您可以询问任何法律相关的问题，包括但不限于合同纠纷、劳动争议、
               知识产权等领域。
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
               {[
                 '合同纠纷咨询',
                 '劳动争议处理',
@@ -132,7 +132,7 @@ const ChatWindow: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => setInput(topic)}
-                  className="px-4 py-3 bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
+                  className="px-3 py-2 md:px-4 md:py-3 text-sm md:text-base bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
                     hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300
                     transform hover:-translate-y-1 active:translate-y-0
                     shadow hover:shadow-md
@@ -148,32 +148,32 @@ const ChatWindow: React.FC = () => {
 
       {/* 消息列表 */}
       {messages.length > 0 && (
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          <div className="max-w-3xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-gray-50">
+          <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-4 ${
+                className={`flex items-start gap-2 md:gap-4 ${
                   message.role === 'user' ? 'flex-row-reverse' : ''
                 }`}
               >
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border ${
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md border ${
                     message.role === 'user'
                       ? 'bg-yellow-50 border-blue-200'
                       : 'bg-yellow-50 border-blue-200'
                   }`}
                 >
                   {message.role === 'user' ? (
-                    <UserCircleIcon className="h-6 w-6 text-blue-500" />
+                    <UserCircleIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-500" />
                   ) : (
-                    <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 md:h-6 md:w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   )}
                 </div>
                 <div
-                  className={`flex-1 rounded-xl px-6 py-4 shadow-md border transform transition-all duration-200 
+                  className={`flex-1 rounded-xl px-4 py-3 md:px-6 md:py-4 shadow-md border transform transition-all duration-200 
                     hover:-translate-y-1 hover:shadow-lg ${
                     message.role === 'user'
                       ? 'bg-yellow-50 border-blue-200'
@@ -183,8 +183,8 @@ const ChatWindow: React.FC = () => {
                   <div 
                     className={`${
                       message.role === 'user' 
-                        ? 'text-gray-800 text-base leading-relaxed' 
-                        : 'text-gray-700 text-base leading-relaxed'
+                        ? 'text-gray-800 text-sm md:text-base leading-relaxed' 
+                        : 'text-gray-700 text-sm md:text-base leading-relaxed'
                     }`}
                   >
                     {message.content.split('\n').map((line, i) => (
@@ -193,7 +193,7 @@ const ChatWindow: React.FC = () => {
                       </p>
                     ))}
                   </div>
-                  <div className="text-xs mt-2 text-gray-500">
+                  <div className="text-[10px] md:text-xs mt-2 text-gray-500">
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
@@ -205,9 +205,9 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* 输入区域 */}
-      <div className="border-t border-blue-200 bg-white p-4 shadow-lg">
+      <div className="border-t border-blue-200 bg-white p-3 md:p-4 shadow-lg">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4">
             <div className="flex-1 relative">
               <textarea
                 ref={textareaRef}
@@ -215,10 +215,10 @@ const ChatWindow: React.FC = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="请输入您的法律问题... (Shift + Enter 换行，Enter 发送)"
-                className="w-full px-6 py-4 bg-yellow-50 border border-blue-200 rounded-xl 
+                className="w-full px-4 py-3 md:px-6 md:py-4 text-sm md:text-base bg-yellow-50 border border-blue-200 rounded-xl 
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-300
                   text-gray-700 placeholder-gray-400 resize-none 
-                  min-h-[56px] max-h-[200px] leading-normal
+                  min-h-[48px] md:min-h-[56px] max-h-[200px] leading-normal
                   shadow-md hover:shadow-lg transition-all duration-200"
                 disabled={isLoading}
                 rows={1}
@@ -228,9 +228,9 @@ const ChatWindow: React.FC = () => {
               type="submit"
               disabled={!input.trim() || isLoading}
               className={`
-                px-6 rounded-xl flex items-center gap-2 transition-all duration-200
+                px-4 md:px-6 rounded-xl flex items-center gap-1 md:gap-2 transition-all duration-200
                 border transform hover:-translate-y-1 active:translate-y-0
-                shadow-md hover:shadow-lg
+                shadow-md hover:shadow-lg text-sm md:text-base
                 ${input.trim() && !isLoading
                   ? 'bg-yellow-50 border-blue-200 text-blue-600 hover:bg-blue-50'
                   : 'bg-gray-50 border-blue-200 text-gray-400 cursor-not-allowed'
@@ -238,11 +238,11 @@ const ChatWindow: React.FC = () => {
               `}
             >
               {isLoading ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                <ArrowPathIcon className="h-4 w-4 md:h-5 md:w-5 animate-spin" />
               ) : (
-                <PaperAirplaneIcon className="h-5 w-5" />
+                <PaperAirplaneIcon className="h-4 w-4 md:h-5 md:w-5" />
               )}
-              <span className="font-medium">
+              <span className="font-medium hidden md:inline">
                 {isLoading ? '思考中...' : '发送'}
               </span>
             </button>
