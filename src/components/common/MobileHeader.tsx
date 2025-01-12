@@ -1,16 +1,13 @@
 import React from 'react';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
-// 使用命名空间来避免类型冲突
-export namespace MobileComponents {
-  export interface HeaderProps {
-    title: string;
-    subtitle?: string;
-    onBack?: () => void;
-  }
+interface MobileHeaderProps {
+  title: string;
+  subtitle?: string;
+  onBack?: () => void;
 }
 
-const MobileHeader: React.FC<MobileComponents.HeaderProps> = ({ 
+const MobileHeader: React.FC<MobileHeaderProps> = ({ 
   title, 
   subtitle, 
   onBack 
@@ -36,12 +33,4 @@ const MobileHeader: React.FC<MobileComponents.HeaderProps> = ({
   );
 };
 
-// 使用 as const 确保类型安全
-export const MOBILE_HEADER_TEST_IDS = {
-  BACK_BUTTON: 'mobile-header-back-button',
-  TITLE: 'mobile-header-title',
-  SUBTITLE: 'mobile-header-subtitle',
-} as const;
-
-// 导出默认组件
 export default MobileHeader; 
