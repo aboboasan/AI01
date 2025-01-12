@@ -3,7 +3,6 @@ import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/rea
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
 import MobileHeader from '../common/MobileHeader';
-import FeatureCard from '../common/FeatureCard';
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -116,15 +115,6 @@ const ChatWindow: React.FC = () => {
     }
   };
 
-  // 处理功能卡片点击
-  const handleFeatureClick = (message: string) => {
-    const event = new CustomEvent('submit', {
-      detail: { message }
-    }) as any;
-    event.target = { message };
-    handleSubmit(event);
-  };
-
   // 渲染移动端界面
   const renderMobileView = () => {
     return (
@@ -216,7 +206,7 @@ const ChatWindow: React.FC = () => {
               <UserCircleIcon className="h-8 w-8 md:h-10 md:w-10 text-blue-500" />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-              Lawbot AI
+              AI法律助手
             </h1>
             <h2 className="text-base md:text-lg font-medium text-gray-700 mb-4">
               专业的法律智能助手，为您提供全方位的法律服务支持
