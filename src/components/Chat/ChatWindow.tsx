@@ -3,6 +3,7 @@ import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/rea
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
 import MobileHeader from '../common/MobileHeader';
+import MobileChatView from './MobileChatView';
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -319,7 +320,20 @@ const ChatWindow: React.FC = () => {
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
       {/* 移动端显示 */}
       <div className="sm:hidden h-full flex flex-col">
-        {renderMobileView()}
+        <MobileChatView
+          messages={messages}
+          input={input}
+          isLoading={isLoading}
+          textareaHeight={textareaHeight}
+          onInputChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onSubmit={handleSubmit}
+          onBack={() => {
+            setMessages([]);
+            setInput('');
+          }}
+          textareaRef={textareaRef}
+        />
       </div>
 
       {/* 桌面端显示 */}

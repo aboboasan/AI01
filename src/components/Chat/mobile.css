@@ -1,0 +1,74 @@
+/* 移动端聊天界面样式 */
+.mobile-chat {
+  /* 消息气泡动画 */
+  @keyframes messageAppear {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message-bubble {
+    animation: messageAppear 0.3s ease-out;
+  }
+
+  /* 输入框动画 */
+  .input-area {
+    transition: all 0.3s ease;
+  }
+
+  /* 加载动画 */
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 长按效果 */
+  .message-content {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .message-content:active {
+    opacity: 0.7;
+  }
+}
+
+/* 自定义滚动条 */
+.chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+/* 键盘弹出时的适配 */
+@media screen and (max-height: 600px) {
+  .mobile-chat .chat-header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  .mobile-chat .message-bubble {
+    margin-bottom: 8px;
+  }
+} 
