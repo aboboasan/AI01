@@ -45,7 +45,7 @@ const ChatWindow: React.FC = () => {
 
     try {
       const apiMessages: ChatMessage[] = messages.map(msg => ({
-        role: msg.role,
+        role: msg.role === 'user' ? 'user' : 'assistant',
         content: msg.content
       }));
       
@@ -105,13 +105,6 @@ const ChatWindow: React.FC = () => {
     }
   };
 
-  // 处理功能按钮点击
-  const handleFeatureClick = (message: string) => {
-    setInput(message);
-    // 自动提交表单，触发对话
-    handleSubmit(new Event('submit') as any);
-  };
-
   // 渲染移动端界面
   const renderMobileView = () => {
     if (messages.length === 0) {
@@ -137,25 +130,37 @@ const ChatWindow: React.FC = () => {
                   icon="💬"
                   title="专业解答法律问题"
                   description="智能法律顾问为您解答各类法律问题，提供专业建议"
-                  onClick={() => setInput('我需要法律咨询服务')}
+                  onClick={() => {
+                    setInput('我需要法律咨询服务');
+                    handleSubmit(new Event('submit') as any);
+                  }}
                 />
                 <FeatureCard
                   icon="📝"
                   title="快速生成法律文书"
                   description="快速生成各类法律文书，包括合同、协议、诉讼文书等"
-                  onClick={() => setInput('帮我生成法律文书')}
+                  onClick={() => {
+                    setInput('帮我生成法律文书');
+                    handleSubmit(new Event('submit') as any);
+                  }}
                 />
                 <FeatureCard
                   icon="🔍"
                   title="海量案例检索"
                   description="海量案例库检索，找到与您情况相似的典型案例"
-                  onClick={() => setInput('查找相关法律案例')}
+                  onClick={() => {
+                    setInput('查找相关法律案例');
+                    handleSubmit(new Event('submit') as any);
+                  }}
                 />
                 <FeatureCard
                   icon="📋"
                   title="智能合同审查"
                   description="智能分析合同条款，识别潜在风险，提供修改建议"
-                  onClick={() => setInput('审查合同内容')}
+                  onClick={() => {
+                    setInput('审查合同内容');
+                    handleSubmit(new Event('submit') as any);
+                  }}
                 />
               </div>
             </div>
