@@ -27,21 +27,36 @@ export interface LegalCase {
   url: string;
 }
 
-export const chatCompletion = async (messages: ChatMessage[]) => {
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+export interface ChatResponse {
+  content: string;
+}
+
+export async function chatCompletion(messages: ChatMessage[]): Promise<ChatResponse> {
   try {
-    const response = await api.post('/chat/completions', {
-      model: 'deepseek-chat',
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 2000,
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages }),
     });
 
-    return response.data.choices[0].message;
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('API调用错误:', error);
+    console.error('Chat API Error:', error);
     throw error;
   }
-};
+}
 
 export const searchLegalCases = async (searchTerm: string): Promise<LegalCase[]> => {
   try {

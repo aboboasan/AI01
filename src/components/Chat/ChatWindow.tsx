@@ -30,11 +30,11 @@ const ChatWindow: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() && !e.nativeEvent) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: input || (e as any).target?.message,
       role: 'user',
       timestamp: new Date().toISOString()
     };
@@ -107,17 +107,11 @@ const ChatWindow: React.FC = () => {
 
   // 处理功能卡片点击
   const handleFeatureClick = (message: string) => {
-    setMessages([{
-      id: Date.now().toString(),
-      content: message,
-      role: 'user',
-      timestamp: new Date().toISOString()
-    }]);
-    
-    // 自动触发表单提交
-    setTimeout(() => {
-      handleSubmit(new Event('submit') as any);
-    }, 100);
+    const event = new CustomEvent('submit', {
+      detail: { message }
+    }) as any;
+    event.target = { message };
+    handleSubmit(event);
   };
 
   // 渲染移动端界面
