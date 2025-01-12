@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ChatMessage } from './types';
+import type { ChatMessage } from './types';
 
 const API_BASE_URL = 'https://api.deepseek.com/v1';  // 替换为实际的API地址
 const API_KEY = process.env.REACT_APP_DEEPSEEK_API_KEY;
@@ -27,36 +27,21 @@ export interface LegalCase {
   url: string;
 }
 
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-export interface ChatResponse {
-  content: string;
-}
-
-export async function chatCompletion(messages: ChatMessage[]): Promise<ChatResponse> {
+export const chatCompletion = async (messages: ChatMessage[]) => {
   try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ messages }),
+    const response = await api.post('/chat/completions', {
+      model: 'deepseek-chat',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 2000,
     });
 
-    if (!response.ok) {
-      throw new Error('API request failed');
-    }
-
-    const data = await response.json();
-    return data;
+    return response.data.choices[0].message;
   } catch (error) {
-    console.error('Chat API Error:', error);
+    console.error('API调用错误:', error);
     throw error;
   }
-}
+};
 
 export const searchLegalCases = async (searchTerm: string): Promise<LegalCase[]> => {
   try {
@@ -116,6 +101,6 @@ export const getRandomLegalInfo = async (): Promise<LegalCase[]> => {
   }
 };
 
-export type { ChatMessage };
+export type { ChatMessage } from './types';
 
 export default api; 
