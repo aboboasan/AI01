@@ -9,8 +9,19 @@ const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [textareaHeight, setTextareaHeight] = useState('44px');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '44px';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = scrollHeight + 'px';
+      setTextareaHeight(scrollHeight + 'px');
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -197,86 +208,229 @@ const ChatWindow: React.FC = () => {
     }
 
     return (
-      <div className="flex flex-col h-full">
-        <MobileHeader 
-          title="AI法律助手" 
-          subtitle="正在为您服务"
-          onBack={() => setMessages([])}
-        />
-        <div className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="max-w-lg mx-auto p-3 space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-2 ${
-                  message.role === 'user' ? 'flex-row-reverse' : ''
-                }`}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
-                    message.role === 'user'
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-yellow-50 border-blue-200'
-                  }`}
-                >
-                  {message.role === 'user' ? (
-                    <UserCircleIcon className="h-4 w-4 text-blue-500" />
-                  ) : (
-                    <svg className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  )}
-                </div>
-                <div
-                  className={`flex-1 rounded-xl px-3 py-2 shadow-sm border ${
-                    message.role === 'user'
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-white border-blue-200'
-                  }`}
-                >
-                  <div className="text-sm text-gray-800 whitespace-pre-wrap">
-                    {message.content}
-                  </div>
-                  <div className="text-[10px] mt-1 text-gray-500">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </div>
+      <div className="h-full flex flex-col">
+        {/* Mobile View */}
+        <div className="block sm:hidden h-full">
+          <div className="flex flex-col h-full">
+            {messages.length === 0 ? (
+              <div className="flex-1 p-4 pb-20">
+                <MobileHeader 
+                  title="AI法律助手" 
+                  subtitle="正在为您服务"
+                />
+                <div className="mt-6 space-y-4">
+                  <FeatureCard
+                    title="分析案情提供建议"
+                    onClick={() => handleFeatureClick("我需要法律咨询，请分析我的案情并提供专业建议。")}
+                    className="bg-gradient-to-r from-blue-50 to-white"
+                  />
+                  <FeatureCard
+                    title="解释法律术语"
+                    onClick={() => handleFeatureClick("请帮我解释一些法律术语的具体含义。")}
+                    className="bg-gradient-to-r from-blue-50 to-white"
+                  />
+                  <FeatureCard
+                    title="评估法律风险"
+                    onClick={() => handleFeatureClick("请帮我评估一下这个情况的法律风险。")}
+                    className="bg-gradient-to-r from-blue-50 to-white"
+                  />
+                  <FeatureCard
+                    title="推荐解决方案"
+                    onClick={() => handleFeatureClick("我遇到了一个法律问题，请推荐可行的解决方案。")}
+                    className="bg-gradient-to-r from-blue-50 to-white"
+                  />
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-        <div className="border-t border-gray-200 bg-white px-3 py-2">
-          <form onSubmit={handleSubmit} className="relative">
-            <div className="flex items-end gap-2">
-              <div className="flex-1 min-h-[44px]">
+            ) : (
+              <>
+                <MobileHeader 
+                  title="AI法律助手" 
+                  subtitle="正在为您服务"
+                  onBack={() => {
+                    setMessages([]);
+                    setInput('');
+                  }}
+                />
+                <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
+                  {messages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-start mb-6 ${
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {message.role === 'assistant' && (
+                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                          <span className="text-blue-600 text-sm font-medium">AI</span>
+                        </div>
+                      )}
+                      <div
+                        className={`rounded-2xl px-4 py-3 max-w-[85%] ${
+                          message.role === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                      {message.role === 'user' && (
+                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center ml-2">
+                          <span className="text-gray-600 text-sm">我</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            <form
+              onSubmit={handleSubmit}
+              className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4"
+            >
+              <div className="flex items-center space-x-2">
                 <textarea
                   ref={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="请输入您的法律问题..."
-                  className="w-full p-2 border border-gray-200 rounded-xl resize-none 
-                    focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    text-sm placeholder:text-gray-400 min-h-[44px]"
-                  rows={1}
+                  className="flex-1 min-h-[44px] max-h-32 p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={{ height: textareaHeight }}
                 />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-11 w-11 rounded-xl bg-blue-600 flex items-center justify-center disabled:opacity-50"
+                >
+                  <PaperAirplaneIcon className="h-5 w-5 text-white" />
+                </button>
               </div>
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="flex items-center justify-center h-11 w-11 rounded-xl bg-blue-600 text-white 
-                  disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 
-                  transition-colors shadow-md"
-              >
-                {isLoading ? (
-                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                ) : (
-                  <PaperAirplaneIcon className="h-5 w-5" />
-                )}
-              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Desktop View */}
+        <div className="hidden sm:flex flex-col h-full">
+          {messages.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center p-4 md:p-6">
+              <div className="text-center w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-blue-200">
+                <div className="inline-block p-3 bg-yellow-50 rounded-full mb-4 shadow-md">
+                  <UserCircleIcon className="h-10 w-10 md:h-12 md:w-12 text-blue-500" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
+                  Lawbot AI
+                </h1>
+                <h2 className="text-lg md:text-xl font-medium text-gray-700 mb-6">
+                  专业的法律智能助手，为您提供全方位的法律服务支持
+                </h2>
+                <button
+                  onClick={() => setMessages([{
+                    id: Date.now().toString(),
+                    content: '您好，我是您的AI法律助手，请问有什么可以帮您？',
+                    role: 'assistant',
+                    timestamp: new Date().toISOString()
+                  }])}
+                  className="w-full max-w-sm mx-auto p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl
+                    font-medium text-lg shadow-lg hover:shadow-xl
+                    transform hover:-translate-y-1 active:translate-y-0
+                    transition-all duration-200
+                    flex items-center justify-center gap-3"
+                >
+                  <span className="text-2xl">💬</span>
+                  开始对话
+                </button>
+              </div>
             </div>
-          </form>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
+                <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex items-start gap-3 ${
+                        message.role === 'user' ? 'flex-row-reverse' : ''
+                      }`}
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border ${
+                          message.role === 'user'
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'bg-yellow-50 border-blue-200'
+                        }`}
+                      >
+                        {message.role === 'user' ? (
+                          <UserCircleIcon className="h-6 w-6 text-blue-500" />
+                        ) : (
+                          <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                        )}
+                      </div>
+                      <div
+                        className={`flex-1 rounded-2xl px-4 py-3 md:px-6 md:py-4 shadow-sm border ${
+                          message.role === 'user'
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'bg-white border-blue-200'
+                        }`}
+                      >
+                        <div className="text-base leading-relaxed text-gray-800">
+                          {message.content}
+                        </div>
+                        <div className="text-xs mt-2 text-gray-500">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
+              <div className="border-t border-blue-200 bg-white p-3 md:p-4 shadow-lg">
+                <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <textarea
+                        ref={textareaRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="请输入您的法律问题..."
+                        className="w-full px-4 py-3 text-base bg-gray-50 border border-blue-200 rounded-xl
+                          focus:ring-2 focus:ring-blue-500 focus:border-blue-300
+                          text-gray-700 placeholder-gray-400 resize-none 
+                          min-h-[48px] max-h-[200px] leading-normal
+                          shadow-sm hover:shadow transition-all duration-200"
+                        disabled={isLoading}
+                        rows={1}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!input.trim() || isLoading}
+                      className={`
+                        px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+                        border shadow-sm hover:shadow
+                        ${input.trim() && !isLoading
+                          ? 'bg-blue-500 hover:bg-blue-600 border-blue-600 text-white'
+                          : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                        }
+                      `}
+                    >
+                      {isLoading ? (
+                        <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <>
+                          <PaperAirplaneIcon className="h-5 w-5" />
+                          <span className="font-medium">发送</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
