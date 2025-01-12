@@ -1,32 +1,36 @@
 import React from 'react';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 interface MobileHeaderProps {
   title: string;
   subtitle?: string;
+  onBack?: () => void;
 }
 
-const MobileHeader: React.FC<MobileHeaderProps> = ({ title, subtitle }) => {
+const MobileHeader: React.FC<MobileHeaderProps> = ({ 
+  title, 
+  subtitle, 
+  onBack 
+}: MobileHeaderProps) => {
   return (
-    <div className="sm:hidden">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-blue-100">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-              <span className="text-xl">⚖️</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">{title}</h1>
-              {subtitle && (
-                <p className="text-xs text-gray-500">{subtitle}</p>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="p-1 -ml-1 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
+        </button>
+      )}
+      <div className="flex-1">
+        <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+        {subtitle && (
+          <p className="text-sm text-gray-500">{subtitle}</p>
+        )}
       </div>
-      {/* 添加一个占位 div，防止内容被固定定位的 header 遮挡 */}
-      <div className="h-14" />
     </div>
   );
 };
 
+export type { MobileHeaderProps };
 export default MobileHeader; 
