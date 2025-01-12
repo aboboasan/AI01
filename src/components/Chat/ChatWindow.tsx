@@ -141,32 +141,7 @@ const ChatWindow: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto px-4 py-4">
             <div className="space-y-4">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-sm border border-blue-200 mt-2">
-                <h2 className="text-lg font-medium text-gray-800 mb-3">
-                  智能法律顾问随时为您服务
-                </h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  提供专业的法律咨询、文书生成、案例分析等服务
-                </p>
-                <button
-                  onClick={() => setMessages([{
-                    id: Date.now().toString(),
-                    content: '您好，我是您的AI法律助手，请问有什么可以帮您？',
-                    role: 'assistant',
-                    timestamp: new Date().toISOString()
-                  }])}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-3 px-4
-                    font-medium text-base shadow-md hover:shadow-lg
-                    transform hover:-translate-y-0.5 active:translate-y-0
-                    transition-all duration-200
-                    flex items-center justify-center gap-2"
-                >
-                  <span className="text-xl">💬</span>
-                  开始对话
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 mt-4">
+              <div className="grid grid-cols-1 gap-3">
                 <FeatureCard
                   icon="💬"
                   title="分析案情提供建议"
