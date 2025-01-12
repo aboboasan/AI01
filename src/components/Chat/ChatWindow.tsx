@@ -2,14 +2,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
+import MobileFeaturesContainer from './MobileFeaturesContainer';
 import './mobile.css';
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 检测是否为移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -108,56 +120,62 @@ const ChatWindow: React.FC = () => {
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
       {/* 欢迎消息 */}
       {messages.length === 0 && (
-        <div className="flex-1 flex items-center justify-center welcome-container">
-          <div className="text-center w-full max-w-2xl bg-white shadow-lg welcome-card">
-            <div className="inline-block p-2 sm:p-3 bg-yellow-50 rounded-full mb-2 sm:mb-4 shadow-md">
-              <UserCircleIcon className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-blue-500" />
+        <>
+          {isMobile ? (
+            <MobileFeaturesContainer onFeatureSelect={setInput} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center welcome-container">
+              <div className="text-center w-full max-w-2xl bg-white shadow-lg welcome-card">
+                <div className="inline-block p-2 sm:p-3 bg-yellow-50 rounded-full mb-2 sm:mb-4 shadow-md">
+                  <UserCircleIcon className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-blue-500" />
+                </div>
+                <h1 className="welcome-title text-2xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
+                  Lawbot AI
+                </h1>
+                <h2 className="welcome-subtitle text-base sm:text-lg md:text-xl font-medium text-gray-700 mb-4">
+                  专业的法律智能助手，为您提供全方位的法律服务支持
+                </h2>
+                <div className="feature-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+                  {[
+                    {
+                      title: 'AI法律咨询',
+                      icon: '💬',
+                      onClick: () => setInput('我需要法律咨询服务')
+                    },
+                    {
+                      title: '文书生成',
+                      icon: '📝',
+                      onClick: () => setInput('帮我生成法律文书')
+                    },
+                    {
+                      title: '案例检索',
+                      icon: '🔍',
+                      onClick: () => setInput('查找相关法律案例')
+                    },
+                    {
+                      title: '合同审查',
+                      icon: '📋',
+                      onClick: () => setInput('审查合同内容')
+                    }
+                  ].map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={item.onClick}
+                      className="feature-button flex flex-col items-center justify-center p-3 sm:p-4 bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
+                        hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300
+                        transform hover:-translate-y-1 active:translate-y-0
+                        shadow hover:shadow-md
+                        transition-all duration-200"
+                    >
+                      <span className="text-2xl mb-1">{item.icon}</span>
+                      <span className="text-sm sm:text-base font-medium">{item.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <h1 className="welcome-title text-2xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
-              Lawbot AI
-            </h1>
-            <h2 className="welcome-subtitle text-base sm:text-lg md:text-xl font-medium text-gray-700 mb-4">
-              专业的法律智能助手，为您提供全方位的法律服务支持
-            </h2>
-            <div className="feature-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-              {[
-                {
-                  title: 'AI法律咨询',
-                  icon: '💬',
-                  onClick: () => setInput('我需要法律咨询服务')
-                },
-                {
-                  title: '文书生成',
-                  icon: '📝',
-                  onClick: () => setInput('帮我生成法律文书')
-                },
-                {
-                  title: '案例检索',
-                  icon: '🔍',
-                  onClick: () => setInput('查找相关法律案例')
-                },
-                {
-                  title: '合同审查',
-                  icon: '📋',
-                  onClick: () => setInput('审查合同内容')
-                }
-              ].map((item, index) => (
-                <button
-                  key={index}
-                  onClick={item.onClick}
-                  className="feature-button flex flex-col items-center justify-center p-3 sm:p-4 bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
-                    hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300
-                    transform hover:-translate-y-1 active:translate-y-0
-                    shadow hover:shadow-md
-                    transition-all duration-200"
-                >
-                  <span className="text-2xl mb-1">{item.icon}</span>
-                  <span className="text-sm sm:text-base font-medium">{item.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
       {/* 消息列表 */}
