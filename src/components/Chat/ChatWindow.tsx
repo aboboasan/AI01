@@ -17,9 +17,10 @@ const ChatWindow: React.FC = () => {
     setInput(e.target.value);
     if (textareaRef.current) {
       textareaRef.current.style.height = '44px';
-      const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = scrollHeight + 'px';
-      setTextareaHeight(scrollHeight + 'px');
+      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 200);
+      const newHeight = Math.max(44, scrollHeight);
+      textareaRef.current.style.height = newHeight + 'px';
+      setTextareaHeight(newHeight + 'px');
     }
   };
 
