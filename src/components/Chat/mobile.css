@@ -1,0 +1,74 @@
+/* 移动端样式 */
+@media screen and (max-width: 640px) {
+  /* 欢迎页面样式 */
+  .welcome-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .welcome-card {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1rem !important;
+  }
+
+  .welcome-title {
+    font-size: 1.75rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .feature-button {
+    padding: 0.75rem !important;
+  }
+
+  /* 聊天列表样式 */
+  .chat-container {
+    padding: 0.5rem !important;
+  }
+
+  .message-container {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .message-avatar {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .message-content {
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .message-time {
+    font-size: 0.625rem !important;
+  }
+
+  /* 输入区域样式 */
+  .input-container {
+    padding: 0.5rem !important;
+  }
+
+  .input-textarea {
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+    min-height: 2.5rem !important;
+  }
+
+  .send-button {
+    width: 2.5rem !important;
+    padding: 0 !important;
+  }
+} 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Message } from './types';
 import { chatCompletion, ChatMessage } from '../../services/api';
+import './mobile.css';
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -107,18 +108,18 @@ const ChatWindow: React.FC = () => {
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
       {/* 欢迎消息 */}
       {messages.length === 0 && (
-        <div className="flex-1 flex items-center justify-center p-0 sm:p-4 md:p-6">
-          <div className="text-center w-full max-w-2xl mx-0 sm:mx-4 bg-white rounded-none sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 border-0 sm:border sm:border-blue-200">
+        <div className="flex-1 flex items-center justify-center welcome-container">
+          <div className="text-center w-full max-w-2xl bg-white shadow-lg welcome-card">
             <div className="inline-block p-2 sm:p-3 bg-yellow-50 rounded-full mb-2 sm:mb-4 shadow-md">
               <UserCircleIcon className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-blue-500" />
             </div>
-            <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
+            <h1 className="welcome-title text-2xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
               Lawbot AI
             </h1>
-            <h2 className="text-base sm:text-lg md:text-xl font-medium text-gray-700 mb-4">
+            <h2 className="welcome-subtitle text-base sm:text-lg md:text-xl font-medium text-gray-700 mb-4">
               专业的法律智能助手，为您提供全方位的法律服务支持
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+            <div className="feature-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
               {[
                 {
                   title: 'AI法律咨询',
@@ -144,7 +145,7 @@ const ChatWindow: React.FC = () => {
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className="flex flex-col items-center justify-center p-3 sm:p-4 bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
+                  className="feature-button flex flex-col items-center justify-center p-3 sm:p-4 bg-yellow-50 border border-blue-200 rounded-xl text-gray-700
                     hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300
                     transform hover:-translate-y-1 active:translate-y-0
                     shadow hover:shadow-md
@@ -161,17 +162,17 @@ const ChatWindow: React.FC = () => {
 
       {/* 消息列表 */}
       {messages.length > 0 && (
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 bg-gray-50">
+        <div className="flex-1 overflow-y-auto chat-container bg-gray-50">
           <div className="max-w-3xl mx-auto space-y-2 sm:space-y-4 md:space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-2 ${
+                className={`message-container flex items-start gap-2 ${
                   message.role === 'user' ? 'flex-row-reverse' : ''
                 }`}
               >
                 <div
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border ${
+                  className={`message-avatar rounded-full sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border ${
                     message.role === 'user'
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-yellow-50 border-blue-200'
@@ -186,7 +187,7 @@ const ChatWindow: React.FC = () => {
                   )}
                 </div>
                 <div
-                  className={`flex-1 rounded-2xl px-4 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 shadow-sm border ${
+                  className={`message-content flex-1 rounded-2xl shadow-sm border ${
                     message.role === 'user'
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-white border-blue-200'
@@ -195,8 +196,8 @@ const ChatWindow: React.FC = () => {
                   <div 
                     className={`${
                       message.role === 'user' 
-                        ? 'text-gray-800 text-sm sm:text-base leading-relaxed' 
-                        : 'text-gray-700 text-sm sm:text-base leading-relaxed'
+                        ? 'text-gray-800 leading-relaxed' 
+                        : 'text-gray-700 leading-relaxed'
                     }`}
                   >
                     {message.content.split('\n').map((line, i) => (
@@ -205,7 +206,7 @@ const ChatWindow: React.FC = () => {
                       </p>
                     ))}
                   </div>
-                  <div className="text-[10px] sm:text-xs mt-1 sm:mt-2 text-gray-500">
+                  <div className="message-time text-gray-500">
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
@@ -217,7 +218,7 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* 输入区域 */}
-      <div className="border-t border-blue-200 bg-white p-2 sm:p-3 md:p-4 shadow-lg">
+      <div className="input-container border-t border-blue-200 bg-white shadow-lg">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
           <div className="flex gap-2">
             <div className="flex-1 relative">
@@ -227,10 +228,9 @@ const ChatWindow: React.FC = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="请输入您的法律问题..."
-                className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 border border-blue-200 rounded-xl
+                className="input-textarea w-full bg-gray-50 border border-blue-200 rounded-xl
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-300
                   text-gray-700 placeholder-gray-400 resize-none 
-                  min-h-[44px] sm:min-h-[48px] max-h-[120px] sm:max-h-[200px] leading-normal
                   shadow-sm hover:shadow transition-all duration-200"
                 disabled={isLoading}
                 rows={1}
@@ -240,7 +240,7 @@ const ChatWindow: React.FC = () => {
               type="submit"
               disabled={!input.trim() || isLoading}
               className={`
-                w-12 sm:w-auto px-0 sm:px-4 rounded-xl flex items-center justify-center sm:gap-2 transition-all duration-200
+                send-button rounded-xl flex items-center justify-center transition-all duration-200
                 border shadow-sm hover:shadow
                 ${input.trim() && !isLoading
                   ? 'bg-blue-500 hover:bg-blue-600 border-blue-600 text-white'
