@@ -78,7 +78,8 @@ const DocumentSearch: React.FC = () => {
       
       // 解析返回结果
       const results: SearchResult[] = [];
-      const sections = response.content.split('\n\n');
+      const { content } = response;
+      const sections = content.split('\n\n');
       
       for (const section of sections) {
         if (!section.trim()) continue;

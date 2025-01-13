@@ -77,8 +77,12 @@ const DocumentWriter: React.FC = () => {
         }
       ];
 
+      setIsGenerating(true);
+      setError('');
+      
       const response = await chatCompletion(messages);
-      setGeneratedContent(response.content);
+      const { content } = response;
+      setGeneratedContent(content);
     } catch (error) {
       console.error('文书生成失败:', error);
       setError('生成文书时出现错误，请稍后重试');

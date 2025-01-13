@@ -3,12 +3,14 @@ import { ChatWindow } from './components/Chat';
 import { DocumentSearch } from './components/Document';
 import { DocumentWriter } from './components/Writing';
 import { ContractReview } from './components/Contract';
+import { CaseAnalysis } from './components/CaseAnalysis';
 import {
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
   DocumentMagnifyingGlassIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ScaleIcon
 } from '@heroicons/react/24/outline';
 
 interface Tab {
@@ -33,6 +35,20 @@ const tabs: Tab[] = [
       '解释法律术语',
       '评估法律风险',
       '推荐解决方案'
+    ]
+  },
+  {
+    id: 'analysis',
+    name: '案件卷宗分析',
+    icon: ScaleIcon,
+    component: CaseAnalysis,
+    description: '智能分析案件卷宗，提供专业的法律分析和建议',
+    features: [
+      '智能提取关键信息',
+      '多维度案情分析',
+      '法条精准引用',
+      '案件要素归纳',
+      '生成分析报告'
     ]
   },
   {

@@ -181,7 +181,7 @@ const ContractReview: React.FC = () => {
       const response = await chatCompletion(messages);
       
       // 解析返回结果
-      const content = response.content;
+      const { content } = response;
       const summary = content.match(/\[摘要\]([\s\S]*?)\[关键条款\]/)?.[1].trim() || '';
       const keyPoints = content.match(/\[关键条款\]([\s\S]*?)\[风险提示\]/)?.[1].split('-').filter(Boolean).map((s: string) => s.trim()) || [];
       const risks = content.match(/\[风险提示\]([\s\S]*?)\[改进建议\]/)?.[1].split('-').filter(Boolean).map((s: string) => s.trim()) || [];
