@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
 const MobileLayout: React.FC = () => {
@@ -20,19 +20,39 @@ const MobileLayout: React.FC = () => {
     setIsMenuOpen(false);
   };
 
+  const handleBack = () => {
+    if (location.pathname === '/legal-consultation') {
+      // 如果已经在首页，则打开菜单
+      setIsMenuOpen(true);
+    } else {
+      // 否则返回上一页
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 折叠按钮 */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 active:bg-gray-100 transition-colors"
-      >
-        {isMenuOpen ? (
-          <XMarkIcon className="w-6 h-6 text-gray-600" />
-        ) : (
-          <Bars3Icon className="w-6 h-6 text-gray-600" />
-        )}
-      </button>
+      {/* 折叠/返回按钮 */}
+      <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 p-2">
+        <button
+          onClick={handleBack}
+          className={`p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-all transform hover:scale-105 ${
+            isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <ArrowLeftIcon className="w-6 h-6" />
+        </button>
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-all transform hover:scale-105"
+        >
+          {isMenuOpen ? (
+            <XMarkIcon className="w-6 h-6" />
+          ) : (
+            <Bars3Icon className="w-6 h-6" />
+          )}
+        </button>
+      </div>
 
       {/* 菜单面板 */}
       <div
@@ -40,7 +60,7 @@ const MobileLayout: React.FC = () => {
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="pt-16 px-4">
+        <div className="pt-8 px-4">
           <div className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Lawbot AI
           </div>
