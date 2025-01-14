@@ -18,7 +18,7 @@ const LegalConsultation: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState('56px');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isMobile = useMediaQuery({ maxWidth: 768 });
+  const isMobile = window.innerWidth <= 768;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -41,8 +41,10 @@ const LegalConsultation: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -89,19 +91,19 @@ const LegalConsultation: React.FC = () => {
     // 在移动端处理返回操作
   };
 
-  return isMobile ? (
-    <MobileChatView
-      messages={messages}
-      input={input}
-      isLoading={isLoading}
-      textareaHeight={textareaHeight}
-      onInputChange={handleInputChange}
-      onKeyDown={handleKeyDown}
-      onSubmit={handleSubmit}
-      onBack={handleBack}
-      textareaRef={textareaRef}
-    />
-  ) : (
+  if (isMobile) {
+    return (
+      <MobileChatView
+        messages={messages}
+        inputValue={input}
+        isLoading={isLoading}
+        onInputChange={setInput}
+        onSendMessage={handleSubmit}
+      />
+    );
+  }
+
+  return (
     <ChatWindow
       messages={messages}
       input={input}
