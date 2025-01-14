@@ -277,12 +277,20 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
 
   if (analysisResult && isMobile) {
     return (
-      <MobileAnalysisView
-        title="合同审查"
-        description="AI智能分析合同条款，识别潜在风险"
-        content={analysisResult}
-        onBack={() => setAnalysisResult('')}
-      />
+      <>
+        <MobileAnalysisView
+          title="合同审查"
+          description="AI智能分析合同条款，识别潜在风险"
+          content={analysisResult}
+          onBack={() => setAnalysisResult('')}
+        />
+        <MobileActionButtons
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          showPreview={!!analysisResult}
+          showDownload={!!analysisResult}
+        />
+      </>
     );
   }
 
