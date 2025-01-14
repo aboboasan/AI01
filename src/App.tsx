@@ -10,15 +10,19 @@ import DocumentDraft from './components/DocumentDraft/DocumentDraft';
 import ContractReview from './components/ContractReview/ContractReview';
 
 const App: React.FC = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
+    const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    
+    // 初始检查
+    checkMobile();
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const Layout = isMobile ? MobileLayout : MainLayout;
@@ -88,6 +92,27 @@ const App: React.FC = () => {
           } 
         />
 
+        {/* 404 路由 */}
+        <Route 
+          path="*" 
+          element={
+            <ContentArea
+              title="页面未找到"
+              description="抱歉，您访问的页面不存在。"
+            >
+              <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
+                <p className="text-gray-600 mb-8">页面未找到</p>
+                <button
+                  onClick={() => window.location.href = '/'}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  返回首页
+                </button>
+              </div>
+            </ContentArea>
+          }
+        />
       </Route>
     </Routes>
   );
