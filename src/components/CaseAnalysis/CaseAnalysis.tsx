@@ -381,12 +381,20 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
 
   if (analysisResult && isMobile) {
     return (
-      <MobileAnalysisView
-        title="案件分析"
-        description="AI智能分析案件要素，提供专业建议"
-        content={analysisResult}
-        onBack={() => setAnalysisResult('')}
-      />
+      <>
+        <MobileAnalysisView
+          title="案件分析"
+          description="AI智能分析案件要素，提供专业建议"
+          content={analysisResult}
+          onBack={() => setAnalysisResult('')}
+        />
+        <MobileActionButtons
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          showPreview={!!analysisResult}
+          showDownload={!!analysisResult}
+        />
+      </>
     );
   }
 
