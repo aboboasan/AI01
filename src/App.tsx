@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/Layout/MainLayout';
+import MobileLayout from './components/Layout/MobileLayout';
 import ContentArea from './components/Layout/ContentArea';
 import CaseAnalysis from './components/CaseAnalysis/CaseAnalysis';
 import LegalConsultation from './components/LegalConsultation/LegalConsultation';
@@ -9,9 +10,22 @@ import DocumentDraft from './components/DocumentDraft/DocumentDraft';
 import ContractReview from './components/ContractReview/ContractReview';
 
 const App: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const Layout = isMobile ? MobileLayout : MainLayout;
+
   return (
     <Routes>
-      <Route path="/" element={<MainLayout />}>
+      <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/legal-consultation" replace />} />
         
         <Route 
