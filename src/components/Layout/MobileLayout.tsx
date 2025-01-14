@@ -3,7 +3,7 @@ import { Bars3Icon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/outline
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
 const MobileLayout: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,29 +22,29 @@ const MobileLayout: React.FC = () => {
 
   const handleBack = () => {
     if (location.pathname === '/legal-consultation') {
-      // 如果已经在首页，则打开菜单
       setIsMenuOpen(true);
     } else {
-      // 否则返回上一页
       navigate(-1);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-gray-50">
       {/* 折叠/返回按钮 */}
-      <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 p-2">
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2">
         <button
           onClick={handleBack}
-          className={`p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-all transform hover:scale-105 ${
+          className={`p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-colors ${
             isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
+          aria-label="返回"
         >
           <ArrowLeftIcon className="w-6 h-6" />
         </button>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-all transform hover:scale-105"
+          className="p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 active:bg-blue-700 transition-colors"
+          aria-label={isMenuOpen ? "关闭菜单" : "打开菜单"}
         >
           {isMenuOpen ? (
             <XMarkIcon className="w-6 h-6" />
@@ -54,9 +54,9 @@ const MobileLayout: React.FC = () => {
         </button>
       </div>
 
-      {/* 菜单面板 */}
+      {/* 菜单面板 - 使用固定定位避免布局问题 */}
       <div
-        className={`fixed inset-0 bg-white transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-0 bg-white z-40 transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -64,7 +64,7 @@ const MobileLayout: React.FC = () => {
           <div className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Lawbot AI
           </div>
-          <div className="space-y-2">
+          <nav className="space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.path}
@@ -75,22 +75,22 @@ const MobileLayout: React.FC = () => {
                     : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
-                <span className="text-2xl">{item.icon}</span>
+                <span className="text-2xl" role="img" aria-label={item.label}>{item.icon}</span>
                 <span className="text-lg font-medium">{item.label}</span>
               </button>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
 
-      {/* 主内容区域 */}
-      <div
-        className={`min-h-screen transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? 'translate-x-full' : 'translate-x-0'
+      {/* 主内容区域 - 使用相对定位和transform避免闪烁 */}
+      <main
+        className={`relative min-h-screen bg-gray-50 transition-transform duration-300 ease-in-out ${
+          isMenuOpen ? 'translate-x-full pointer-events-none' : 'translate-x-0'
         }`}
       >
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };
