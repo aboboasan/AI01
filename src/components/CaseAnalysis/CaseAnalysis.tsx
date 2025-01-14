@@ -4,6 +4,7 @@ import { Message } from '../Chat/types';
 import { analyzeCaseFile } from '../../services/api';
 import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
+import MobileAnalysisView from '../common/MobileAnalysisView';
 
 interface CaseAnalysisProps {
   // 如果需要props，在这里定义
@@ -224,6 +225,9 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreviewPage, setShowPreviewPage] = useState(false);
 
+  // 添加移动端检测
+  const isMobile = window.innerWidth <= 768;
+
   const handleFile = async (selectedFile: File) => {
     // 检查文件类型
     const allowedTypes = [
@@ -364,6 +368,17 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
       <PreviewPage
         content={analysisResult}
         onBack={() => setShowPreviewPage(false)}
+      />
+    );
+  }
+
+  if (analysisResult && isMobile) {
+    return (
+      <MobileAnalysisView
+        title="案件分析"
+        description="AI智能分析案件要素，提供专业建议"
+        content={analysisResult}
+        onBack={() => setAnalysisResult('')}
       />
     );
   }

@@ -4,6 +4,7 @@ import { Message } from '../Chat/types';
 import { chatCompletion } from '../../services/api';
 import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
+import MobileAnalysisView from '../common/MobileAnalysisView';
 
 interface ContractReviewProps {
   // 如果需要props，在这里定义
@@ -105,6 +106,9 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreviewPage, setShowPreviewPage] = useState(false);
 
+  // 添加移动端检测
+  const isMobile = window.innerWidth <= 768;
+
   const handleFile = async (selectedFile: File) => {
     // 检查文件类型
     const allowedTypes = [
@@ -171,7 +175,7 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
   const readFileContent = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
+      
       // 处理不同类型的文件
       if (file.type === 'text/plain') {
         // 文本文件直接读取
@@ -260,6 +264,17 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
       <PreviewPage
         content={analysisResult}
         onBack={() => setShowPreviewPage(false)}
+      />
+    );
+  }
+
+  if (analysisResult && isMobile) {
+    return (
+      <MobileAnalysisView
+        title="合同审查"
+        description="AI智能分析合同条款，识别潜在风险"
+        content={analysisResult}
+        onBack={() => setAnalysisResult('')}
       />
     );
   }
@@ -374,7 +389,7 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
                 }
               `}
             >
-              {isAnalyzing ? (
+      {isAnalyzing ? (
                 <>
                   <ArrowPathIcon className="h-5 w-5 animate-spin" />
                   <span className="font-medium text-sm">分析中...</span>
@@ -386,7 +401,7 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
                 </>
               )}
             </button>
-          </div>
+        </div>
 
           {/* 分析结果 */}
           {analysisResult && (
