@@ -1,41 +1,34 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "outputDirectory": "build",
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/static-build",
+      "use": "@vercel/node",
       "config": {
-        "distDir": "build",
-        "buildCommand": "npm run build"
+        "buildCommand": "npm run build",
+        "outputDirectory": "build"
       }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "^/static/(.*)",
+      "src": "/static/(.*)",
       "dest": "/static/$1"
     },
     {
-      "src": ".*",
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
   "env": {
-    "REACT_APP_DEEPSEEK_API_KEY": "sk-4c27205edf134b53b269485c766f08d5",
-    "REACT_APP_DEEPSEEK_API_URL": "https://api.deepseek.com",
-    "ALLOWED_ORIGIN": "https://ai-legal-assistant.vercel.app",
-    "NODE_ENV": "production",
     "CI": "false"
   }
 } 
