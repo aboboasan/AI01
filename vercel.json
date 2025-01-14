@@ -17,7 +17,15 @@
       "dest": "/static/$1"
     },
     {
-      "src": "/[^.]+",
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
