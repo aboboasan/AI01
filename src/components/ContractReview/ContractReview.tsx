@@ -5,6 +5,7 @@ import { chatCompletion } from '../../services/api';
 import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
 import MobileAnalysisView from '../common/MobileAnalysisView';
+import MobileActionButtons from '../common/MobileActionButtons';
 
 interface ContractReviewProps {
   // 如果需要props，在这里定义
@@ -245,18 +246,24 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
     }
   };
 
+  const handlePreview = () => {
+    if (analysisResult) {
+      setShowPreviewPage(true);
+    }
+  };
+
   const handleDownload = () => {
     if (!analysisResult) return;
     
     const blob = new Blob([analysisResult], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `合同审查报告_${new Date().toLocaleDateString()}.txt`;
+    link.download = '合同审查报告.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
   };
 
   if (showPreviewPage && analysisResult) {
@@ -280,7 +287,7 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="relative min-h-screen bg-gray-50 p-4">
       {/* 固定在顶部的欢迎区域 */}
       <div className="bg-gray-50 py-4 px-6 border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto text-center">
@@ -466,6 +473,24 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
           )}
         </div>
       </div>
+
+      {/* 移动端操作按钮 */}
+      {isMobile && analysisResult && (
+        <MobileActionButtons
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          showPreview={!!analysisResult}
+          showDownload={!!analysisResult}
+        />
+      )}
+
+      {/* 预览页面 */}
+      {showPreviewPage && (
+        <PreviewPage
+          content={analysisResult}
+          onBack={() => setShowPreviewPage(false)}
+        />
+      )}
     </div>
   );
 };

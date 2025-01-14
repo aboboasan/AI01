@@ -5,6 +5,7 @@ import { analyzeCaseFile } from '../../services/api';
 import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
 import MobileAnalysisView from '../common/MobileAnalysisView';
+import MobileActionButtons from '../common/MobileActionButtons';
 
 interface CaseAnalysisProps {
   // 如果需要props，在这里定义
@@ -349,18 +350,24 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
     }
   };
 
+  const handlePreview = () => {
+    if (analysisResult) {
+      setShowPreviewPage(true);
+    }
+  };
+
   const handleDownload = () => {
     if (!analysisResult) return;
     
     const blob = new Blob([analysisResult], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `案件分析报告_${new Date().toLocaleDateString()}.txt`;
+    link.download = '案件分析报告.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
   };
 
   if (showPreviewPage && analysisResult) {
@@ -570,6 +577,16 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
           )}
         </div>
       </div>
+
+      {/* 移动端操作按钮 */}
+      {isMobile && analysisResult && (
+        <MobileActionButtons
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          showPreview={!!analysisResult}
+          showDownload={!!analysisResult}
+        />
+      )}
     </div>
   );
 };
