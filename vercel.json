@@ -7,7 +7,8 @@
       "config": {
         "distDir": "build",
         "installCommand": "npm install --legacy-peer-deps",
-        "buildCommand": "npm run build"
+        "buildCommand": "npm run build",
+        "devCommand": "npm start"
       }
     }
   ],
@@ -16,8 +17,25 @@
       "handle": "filesystem"
     },
     {
-      "src": "/[^.]+",
-      "dest": "/"
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "NODE_ENV": "production"
+  }
 } 
