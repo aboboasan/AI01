@@ -1,0 +1,56 @@
+.virtual-list-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.virtual-list-container .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 自定义滚动条样式 */
+.virtual-list-container ::-webkit-scrollbar {
+  width: 4px;
+}
+
+.virtual-list-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtual-list-container ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+/* 移动端触摸优化 */
+.virtual-list-container {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* 动画效果 */
+.animate-message-in {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

@@ -1,272 +1,183 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { PaperAirplaneIcon, ArrowPathIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { Message } from './types';
-import { chatCompletion, ChatMessage } from '../../services/api';
-import MobileHeader from '../common/MobileHeader';
-import MobileChatView from './MobileChatView';
+import VirtualList from '../common/VirtualList';
 
-const ChatWindow: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [textareaHeight, setTextareaHeight] = useState('44px');
+interface ChatWindowProps {
+  messages: Message[];
+  input: string;
+  isLoading: boolean;
+  textareaHeight: string;
+  onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (e: React.FormEvent) => Promise<void>;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
+}
+
+const ChatWindow: React.FC<ChatWindowProps> = ({
+  messages,
+  input,
+  isLoading,
+  textareaHeight,
+  onInputChange,
+  onKeyDown,
+  onSubmit,
+  textareaRef,
+}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const lastMessageRef = useRef<string>('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '44px';
-      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 200);
-      const newHeight = Math.max(44, scrollHeight);
-      textareaRef.current.style.height = newHeight + 'px';
-      setTextareaHeight(newHeight + 'px');
-    }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // 自动调整文本框高度
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [input]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() && !e.nativeEvent) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input || (e as any).target?.message,
-      role: 'user',
-      timestamp: new Date().toISOString()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      const apiMessages: ChatMessage[] = messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      }));
-      
-      apiMessages.unshift({
-        role: 'system',
-        content: `作为您的私人法律顾问，我将始终站在您的立场，全心全意维护您的合法权益：
-
-1. 利益优先：我会始终以保护您的合法权益为首要任务
-2. 风险防范：帮您预见并规避潜在法律风险
-3. 成本意识：建议最经济有效的解决方案
-4. 通俗易懂：用清晰易懂的语言解释复杂的法律问题
-5. 实用建议：提供具体可行的操作建议
-
-我将：
-- 仔细分析您的具体情况
-- 引用相关法律法规
-- 提供多个解决方案及其利弊分析
-- 特别提示时效性要求和注意事项
-- 建议是否需要寻求线下律师帮助
-
-让我们开始吧，请详细描述您的问题。`
+  // 自动滚动到底部，使用 RAF 确保平滑滚动
+  const scrollToBottom = useCallback(() => {
+    if (autoScroll && scrollContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({
+            top: scrollContainerRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
       });
-      apiMessages.push({
-        role: 'user',
-        content: userMessage.content
-      });
-
-      const response = await chatCompletion(apiMessages);
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.content,
-        role: 'assistant',
-        timestamp: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error('API调用错误:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: '抱歉，我遇到了一些问题。请稍后再试。',
-        role: 'assistant',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [autoScroll]);
 
-  // 处理按键事件
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
+  // 监听新消息和加载状态
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.content !== lastMessageRef.current) {
+      lastMessageRef.current = lastMessage.content;
+      scrollToBottom();
     }
-  };
+  }, [messages, scrollToBottom]);
 
-  const renderDesktopView = () => {
-    if (messages.length === 0) {
-      return (
-        <div className="flex flex-1 items-center justify-center p-3 md:p-4">
-          <div className="text-center w-full max-w-xl mx-4 bg-white rounded-xl shadow-md p-4 md:p-6 border border-blue-200">
-            <div className="inline-block p-2 bg-yellow-50 rounded-full mb-3 shadow-sm">
-              <UserCircleIcon className="h-8 w-8 md:h-10 md:w-10 text-blue-500" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-              AI法律助手
-            </h1>
-            <h2 className="text-base md:text-lg font-medium text-gray-700 mb-4">
-              专业的法律智能助手，为您提供全方位的法律服务支持
-            </h2>
-            <button
-              onClick={() => setMessages([{
-                id: Date.now().toString(),
-                content: '您好，我是您的AI法律助手，请问有什么可以帮您？',
-                role: 'assistant',
-                timestamp: new Date().toISOString()
-              }])}
-              className="w-full max-w-sm mx-auto p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl
-                font-medium text-base shadow-md hover:shadow-lg
-                transform hover:-translate-y-0.5 active:translate-y-0
-                transition-all duration-200
-                flex items-center justify-center gap-2"
-            >
-              <span className="text-xl">💬</span>
-              开始对话
-            </button>
-          </div>
-        </div>
-      );
-    }
+  // 监听滚动事件，使用节流优化性能
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    setAutoScroll(isNearBottom);
+  }, []);
 
+  const renderMessage = (message: Message, index: number) => {
+    const isUser = message.role === 'user';
+    const isSystem = message.role === 'system';
+    const isFirst = index === 0;
+    const isLast = index === messages.length - 1;
+    
     return (
-      <>
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
-          <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-3 ${
-                  message.role === 'user' ? 'flex-row-reverse' : ''
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border ${
-                    message.role === 'user'
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-yellow-50 border-blue-200'
-                  }`}
-                >
-                  {message.role === 'user' ? (
-                    <UserCircleIcon className="h-6 w-6 text-blue-500" />
-                  ) : (
-                    <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  )}
-                </div>
-                <div
-                  className={`flex-1 rounded-2xl px-4 py-3 md:px-6 md:py-4 shadow-sm border ${
-                    message.role === 'user'
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-white border-blue-200'
-                  }`}
-                >
-                  <div className="text-base leading-relaxed text-gray-800">
-                    {message.content}
-                  </div>
-                  <div className="text-xs mt-2 text-gray-500">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+      <div 
+        key={message.id} 
+        className={`
+          flex ${isUser ? 'justify-end' : 'justify-start'} 
+          ${isFirst ? 'mt-4' : 'mt-2'} 
+          ${isLast ? 'mb-4' : 'mb-2'}
+          animate-fadeIn
+        `}
+      >
+        {!isUser && !isSystem && (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mr-2 flex-shrink-0">
+            <span className="text-blue-600 text-sm">AI</span>
           </div>
+        )}
+        <div 
+          className={`
+            relative
+            max-w-[75%] p-4 rounded-2xl shadow-md 
+            transform transition-all duration-200 hover:-translate-y-0.5
+            ${isUser 
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white ml-4' 
+              : isSystem
+                ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-800 border border-yellow-200'
+                : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800'
+            }
+            ${!isUser && !isSystem ? 'ml-2' : ''}
+            ${isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'}
+          `}
+        >
+          <p className="leading-relaxed whitespace-pre-wrap break-words">
+            {message.content}
+          </p>
+          <span className={`
+            text-xs mt-2 block opacity-60
+            ${isUser ? 'text-gray-100' : 'text-gray-500'}
+          `}>
+            {message.timestamp}
+          </span>
+          {/* 添加小三角 */}
+          <div className={`
+            absolute top-0 w-0 h-0
+            border-8 border-transparent
+            ${isUser 
+              ? 'right-0 border-t-blue-500 -translate-y-[0.5px]' 
+              : !isSystem 
+                ? 'left-0 border-t-gray-50 -translate-y-[0.5px]'
+                : ''
+            }
+          `} />
         </div>
-        <div className="border-t border-blue-200 bg-white p-3 md:p-4 shadow-lg">
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="请输入您的法律问题..."
-                  className="w-full px-4 py-3 text-base bg-gray-50 border border-blue-200 rounded-xl
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-300
-                    text-gray-700 placeholder-gray-400 resize-none 
-                    min-h-[48px] max-h-[200px] leading-normal
-                    shadow-sm hover:shadow transition-all duration-200"
-                  disabled={isLoading}
-                  rows={1}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={!input.trim() || isLoading}
-                className={`
-                  px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200
-                  border shadow-sm hover:shadow
-                  ${input.trim() && !isLoading
-                    ? 'bg-blue-500 hover:bg-blue-600 border-blue-600 text-white'
-                    : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                  }
-                `}
-              >
-                {isLoading ? (
-                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    <PaperAirplaneIcon className="h-5 w-5" />
-                    <span className="font-medium">发送</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </>
+        {isUser && (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center ml-2 flex-shrink-0">
+            <span className="text-white text-sm">我</span>
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
-      {/* 移动端显示 */}
-      <div className="sm:hidden h-full flex flex-col">
-        <MobileChatView
-          messages={messages}
-          input={input}
-          isLoading={isLoading}
-          textareaHeight={textareaHeight}
-          onInputChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onSubmit={handleSubmit}
-          onBack={() => {
-            setMessages([]);
-            setInput('');
-          }}
-          textareaRef={textareaRef}
-        />
+    <div className="flex flex-col h-full bg-gray-50">
+      <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 scroll-smooth"
+        onScroll={handleScroll}
+      >
+        <div className="max-w-3xl mx-auto">
+          {messages.map((message, index) => renderMessage(message, index))}
+          <div ref={messagesEndRef} className="h-4" />
+          {isLoading && (
+            <div className="flex justify-center py-4">
+              <div className="animate-bounce w-2 h-2 bg-blue-500 rounded-full mr-1" />
+              <div className="animate-bounce w-2 h-2 bg-blue-500 rounded-full mr-1 delay-100" />
+              <div className="animate-bounce w-2 h-2 bg-blue-500 rounded-full delay-200" />
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* 桌面端显示 */}
-      <div className="hidden sm:flex flex-col h-full">
-        {renderDesktopView()}
+      
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="max-w-3xl mx-auto">
+          <form onSubmit={onSubmit} className="relative">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={onInputChange}
+              onKeyDown={onKeyDown}
+              style={{ height: textareaHeight }}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg pr-20 
+                shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none
+                transition-all duration-200"
+              placeholder="请描述您的法律问题，我会为您提供专业的建议..."
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className={`
+                absolute right-2 bottom-2 px-4 py-2 rounded-lg
+                bg-gradient-to-r from-blue-500 to-blue-600 text-white
+                transform transition-all duration-200
+                ${isLoading || !input.trim() 
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:-translate-y-0.5 hover:shadow-md'
+                }
+              `}
+            >
+              发送
+            </button>
+          </form>
+          <p className="mt-2 text-xs text-gray-500 text-center">
+            按 Enter 发送消息，按 Shift + Enter 换行
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { CloudArrowUpIcon, DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowPathIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { chatCompletion, ChatMessage, analyzeCaseFile } from '../../services/api';
+import { Message } from '../Chat/types';
+import { analyzeCaseFile } from '../../services/api';
 import mammoth from 'mammoth';
-import { CaseAnalysis as CaseAnalysisType } from './types';
 import PreviewPage from './PreviewPage';
 
 interface CaseAnalysisProps {
@@ -129,6 +129,91 @@ function extractKeyPoints(text: string): any[] {
   }));
 }
 
+// 辅助函数：提取不合法合规问题
+function extractComplianceIssues(text: string): any[] {
+  if (!text) return [];
+  const complianceMatch = text.match(/不合法合规问题：([\s\S]*?)(?=\n\[|$)/);
+  if (!complianceMatch) return [];
+  return complianceMatch[1].split(/\n(?=\d+[.、])/).map(issue => ({
+    type: '未提供', // 程序违法/实体违法/合规性瑕疵
+    description: issue.trim(),
+    legalBasis: '未提供',
+    impact: '未提供',
+    suggestion: '未提供',
+    priority: '未提供'
+  }));
+}
+
+const systemMessage: Message = {
+  id: 'system',
+  role: 'system',
+  content: `作为一名拥有20年丰富经验的检察官，我在审查案件时始终坚持以事实为依据、以法律为准绳，同时兼顾公平正义。我将从以下维度对案件进行全面客观的分析：
+
+【案件基础审查】
+- 管辖权审查：地域管辖、级别管辖、专门管辖的合法性
+- 当事人资格审查：诉讼主体资格、代理权限的合规性
+- 程序启动合法性：立案条件、程序选择的适当性
+- 期限遵守情况：法定期限、合理期限的执行情况
+
+【证据链完整性审查】
+- 证据合法性：取证程序、证据保管的规范性
+- 证据关联性：与案件事实的关联程度分析
+- 证据真实性：物证、书证的真伪鉴定结果
+- 证据充分性：是否达到法定证明标准
+- 证据矛盾点：不同证据间的冲突与印证分析
+
+【实体问题审查】
+- 犯罪构成要件：主体、主观、客体、客观方面的认定
+- 法律适用准确性：罪名认定、法条适用的准确性
+- 量刑情节评估：从轻、从重、减轻、免除情节的认定
+- 社会危害性：对社会秩序和公共利益的影响程度
+- 共同犯罪认定：主从犯、胁从犯的认定及量刑建议
+
+【程序合法性审查】
+- 强制措施使用：拘留、逮捕、取保候审等措施的合法性
+- 侦查行为合法性：搜查、扣押、讯问等程序的规范性
+- 诉讼权利保障：知情权、辩护权等基本权利的保障情况
+- 回避制度执行：办案人员回避制度的落实情况
+- 特殊程序适用：认罪认罚、简易程序等的适用合法性
+
+【法律文书审查】
+- 文书格式规范性：格式要素的完整性和规范性
+- 文书内容准确性：事实描述、法律适用的准确性
+- 文书逻辑性：论证过程、结论推导的严密性
+- 法律用语规范：专业术语使用的准确性和统一性
+- 文书说理充分性：理由阐述的充分性和说服力
+
+【社会影响评估】
+- 舆论关注度：社会影响范围和程度分析
+- 类案分析：与同类案件处理的一致性评估
+- 预防教育：对未来类似案件的指导意义
+- 被害人权益：救济措施的适当性和有效性
+- 社会稳定：对社会秩序的影响评估
+
+【执法办案质量评估】
+- 办案程序规范性：程序瑕疵的识别和评估
+- 证据采信合理性：证据采信标准的把握情况
+- 法律适用准确性：法律条文理解和适用的准确性
+- 自由裁量合理性：自由裁量权行使的适当性
+- 执法公正性：执法偏差的识别和纠正
+
+【综合建议】
+- 案件定性建议：对案件性质的认定意见
+- 处理方式建议：具体处理措施的可行性建议
+- 程序完善建议：对程序瑕疵的补正意见
+- 防范措施建议：预防类似案件的具体建议
+- 执法规范建议：完善执法程序的建议
+
+我将严格遵循上述框架，对案件材料进行客观分析，确保分析结果准确、专业、全面。对于每个审查要点，我都会：
+1. 明确指出存在的问题和不足
+2. 引用相关法律法规依据
+3. 提供具体的改进建议
+4. 注重分析的可操作性
+
+请提供需要分析的案件材料，我将为您出具专业、严谨的检察审查意见。`,
+  timestamp: new Date().toISOString()
+};
+
 const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
   const [file, setFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState('');
@@ -152,9 +237,9 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
       return;
     }
 
-    // 检查文件大小（限制为 10MB）
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setError('文件大小不能超过 10MB');
+    // 检查文件大小（限制为 20MB）
+    if (selectedFile.size > 20 * 1024 * 1024) {
+      setError('文件大小不能超过 20MB');
       return;
     }
 
@@ -241,7 +326,7 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
   };
 
   const handleAnalyze = async () => {
-    if (!fileContent) {
+    if (!file || !fileContent) {
       setError('请先上传文件');
       return;
     }
@@ -250,12 +335,11 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
     setError('');
 
     try {
-      const result = await analyzeCaseFile(file!);
-      console.log('Analysis result:', result);
+      const result = await analyzeCaseFile(fileContent);
       setAnalysisResult(result);
     } catch (error) {
       console.error('案件分析失败:', error);
-      setError(`案件分析失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      setError(error instanceof Error ? error.message : '案件分析失败，请重试');
     } finally {
       setIsAnalyzing(false);
     }
@@ -296,7 +380,7 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
             案件卷宗分析
           </h2>
           <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            上传案件卷宗，AI将为您提供深度分析、关键信息提取和专业建议
+            作为一名拥有20年丰富经验的检察官，我在审查案件时，始终坚持以事实为依据、以法律为准绳，同时兼顾公平正义，我会从案件，卷宗客观分析并产生以下内容，我会适当引用法律条文内容，对每个输出内容做出主观性的判断
           </p>
         </div>
       </div>
@@ -337,7 +421,7 @@ const CaseAnalysis: React.FC<CaseAnalysisProps> = () => {
                       {isDragging ? '释放文件以上传' : '拖拽文件到此处或点击上传'}
                     </div>
                     <div className="text-xs text-gray-500">
-                      支持 .txt、.doc、.docx 格式，最大 10MB
+                      支持 .txt、.doc、.docx 格式，最大 20MB
                     </div>
                   </>
                 ) : (

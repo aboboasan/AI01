@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MagnifyingGlassIcon, LinkIcon, DocumentTextIcon, ScaleIcon, CalendarIcon, BookmarkIcon, LightBulbIcon } from '@heroicons/react/24/outline';
-import { chatCompletion, ChatMessage } from '../../services/api';
+import { chatCompletion } from '../../services/api';
+import type { ChatMessage } from '../../services/types';
 
 interface SearchResult {
   title: string;

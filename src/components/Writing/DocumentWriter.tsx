@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DocumentTextIcon, ClipboardIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { chatCompletion, ChatMessage } from '../../services/api';
+import { chatCompletion } from '../../services/api';
+import type { ChatMessage } from '../../services/types';
 
 interface FormData {
   documentType: string;

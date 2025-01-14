@@ -1,197 +1,104 @@
 import React, { useState } from 'react';
-import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, CalendarIcon, MapPinIcon, ScaleIcon, DocumentTextIcon, LinkIcon } from '@heroicons/react/24/outline';
-import { Input } from '../common/Input';
-import { Button } from '../common/Button';
-import { searchLegalCases, getRandomLegalInfo, type LegalCase } from '../../services/api';
-
-interface Filters {
-  court: string;
-  dateRange: string;
-  caseType: string;
-}
+import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { searchLegalCases } from '../../services/api';
+import type { LegalCase } from '../../services/types';
 
 const CaseSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<LegalCase[]>([]);
-  const [error, setError] = useState('');
-  const [filters, setFilters] = useState<Filters>({
-    court: '',
-    dateRange: '',
-    caseType: ''
-  });
-
-  const handleRandomSearch = async () => {
-    setIsSearching(true);
-    setError('');
-    try {
-      const randomCases = await getRandomLegalInfo();
-      setResults(randomCases);
-    } catch (error) {
-      console.error('搜索失败:', error);
-      setError('获取案例失败，请重试');
-    } finally {
-      setIsSearching(false);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<LegalCase[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchTerm.trim() || isSearching) return;
+    if (!searchTerm.trim()) {
+      setError('请输入搜索关键词');
+      return;
+    }
 
-    setIsSearching(true);
-    setError('');
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const searchResults = await searchLegalCases(searchTerm);
-      // 应用筛选条件
-      const filteredResults = searchResults.filter(result => {
-        const courtMatch = !filters.court || result.court.includes(filters.court);
-        const typeMatch = !filters.caseType || result.caseType === filters.caseType;
-        
-        if (!filters.dateRange) return courtMatch && typeMatch;
-        
-        const caseDate = new Date(result.date);
-        const now = new Date();
-        const yearDiff = now.getFullYear() - caseDate.getFullYear();
-        
-        switch (filters.dateRange) {
-          case '1year':
-            return yearDiff <= 1 && courtMatch && typeMatch;
-          case '3years':
-            return yearDiff <= 3 && courtMatch && typeMatch;
-          case '5years':
-            return yearDiff <= 5 && courtMatch && typeMatch;
-          default:
-            return courtMatch && typeMatch;
-        }
-      });
-      
-      setResults(filteredResults);
-    } catch (error) {
-      console.error('搜索失败:', error);
+      const results = await searchLegalCases(searchTerm);
+      setSearchResults(results);
+      if (results.length === 0) {
+        setError('未找到相关案例');
+      }
+    } catch (err) {
       setError('搜索失败，请重试');
+      console.error('搜索出错:', err);
     } finally {
-      setIsSearching(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 border-b border-gray-200 bg-white">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <Input
-                placeholder="请输入要检索的法律问题或关键词"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                multiline
-                className="flex-1"
-                icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
-              />
-            </div>
-            <Button
-              type="submit"
-              isLoading={isSearching}
-              icon={<AdjustmentsHorizontalIcon className="h-5 w-5" />}
-            >
-              筛选
-            </Button>
+    <div className="p-4">
+      <div className="max-w-4xl mx-auto">
+        <form onSubmit={handleSearch} className="relative mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 pl-12 pr-4 text-gray-900 bg-white border border-gray-200 rounded-lg 
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+              placeholder="输入关键词搜索相关案例..."
+            />
+            <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
-          
-          <div className="flex space-x-4">
-            <select
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.court}
-              onChange={(e) => setFilters({ ...filters, court: e.target.value })}
-            >
-              <option value="">所有法院</option>
-              <option value="最高人民法院">最高人民法院</option>
-              <option value="高级人民法院">高级人民法院</option>
-              <option value="中级人民法院">中级人民法院</option>
-            </select>
-            
-            <select
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.dateRange}
-              onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
-            >
-              <option value="">所有时间</option>
-              <option value="1year">最近一年</option>
-              <option value="3years">最近三年</option>
-              <option value="5years">最近五年</option>
-            </select>
-            
-            <select
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.caseType}
-              onChange={(e) => setFilters({ ...filters, caseType: e.target.value })}
-            >
-              <option value="">所有类型</option>
-              <option value="民事案件">民事案件</option>
-              <option value="刑事案件">刑事案件</option>
-              <option value="行政案件">行政案件</option>
-            </select>
-          </div>
-        </form>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-        
-        {results.map((result) => (
-          <div
-            key={result.id}
-            className="bg-white rounded-lg p-6 mb-4 shadow-sm hover:shadow-md transition-shadow"
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`
+              absolute right-2 top-1/2 transform -translate-y-1/2
+              px-4 py-2 rounded-lg flex items-center gap-2
+              bg-gradient-to-r from-blue-500 to-blue-600 text-white
+              transition-all duration-200
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md hover:-translate-y-0.5'}
+            `}
           >
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-semibold text-gray-900">{result.title}</h3>
-              <span className="text-sm font-medium text-gray-500">{result.reference}</span>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="flex items-center text-gray-600">
-                <ScaleIcon className="h-5 w-5 mr-2" />
-                <span>{result.court}</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <CalendarIcon className="h-5 w-5 mr-2" />
-                <span>{result.date}</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <MapPinIcon className="h-5 w-5 mr-2" />
-                <span>{result.location}</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <DocumentTextIcon className="h-5 w-5 mr-2" />
-                <span>{result.caseType}</span>
-              </div>
-            </div>
+            <FunnelIcon className="w-5 h-5" />
+            搜索
+          </button>
+        </form>
 
-            <p className="text-gray-600 mb-4">{result.summary}</p>
-            
-            <div className="flex justify-end">
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-blue-600 hover:text-blue-800"
-              >
-                <LinkIcon className="h-5 w-5 mr-1" />
-                查看完整判决书
-              </a>
-            </div>
+        {error && (
+          <div className="text-center text-red-500 mb-4">{error}</div>
+        )}
+
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
           </div>
-        ))}
-        
-        {results.length === 0 && !isSearching && (
-          <div className="text-center text-gray-500 mt-8">
-            <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>输入关键词开始搜索案例</p>
+        ) : (
+          <div className="space-y-4">
+            {searchResults.map((result) => (
+              <div
+                key={result.id}
+                className="p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              >
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{result.title}</h3>
+                <div className="flex gap-4 text-sm text-gray-500 mb-2">
+                  <span>{result.court}</span>
+                  <span>{result.date}</span>
+                  <span>{result.type}</span>
+                </div>
+                <p className="text-gray-700 mb-2">{result.summary}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">{result.reference}</span>
+                  <a
+                    href={result.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-600 text-sm"
+                  >
+                    查看详情 →
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
