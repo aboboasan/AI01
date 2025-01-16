@@ -1,4 +1,3 @@
-import { CaseSearch } from './CaseSearch';
+import CaseSearch from './CaseSearch';
 
-export { CaseSearch };
 export default CaseSearch; 
