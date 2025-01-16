@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { FaComments, FaSearch, FaFileAlt, FaFileContract, FaGavel } from 'react-icons/fa';
 import { BsSunFill, BsMoonFill } from 'react-icons/bs';
 import { MdAutoAwesome } from 'react-icons/md';
@@ -89,7 +89,7 @@ const MobileLayout: React.FC = () => {
       <main className="flex-1 mt-14 mb-16 p-4">
         <div className={`rounded-2xl ${theme.colors.surface} backdrop-blur-md 
           shadow-lg border ${theme.colors.border} p-4 min-h-[calc(100vh-8rem)]`}>
-          {/* 页面内容将在这里渲染 */}
+          <Outlet />
         </div>
       </main>
 

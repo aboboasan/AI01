@@ -6,7 +6,7 @@ import MobileLayout from './components/Layout/MobileLayout';
 import ContentArea from './components/Layout/ContentArea';
 import LawyerAnalysis from './components/LawyerAnalysis';
 import LegalConsultation from './components/LegalConsultation/LegalConsultation';
-import CaseSearch from './components/CaseSearch/CaseSearch';
+import CaseSearch from './components/CaseSearch';
 import DocumentDraft from './components/DocumentDraft/DocumentDraft';
 import ContractReview from './components/ContractReview/ContractReview';
 
