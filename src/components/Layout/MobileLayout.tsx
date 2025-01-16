@@ -10,6 +10,7 @@ const MobileLayout: React.FC = () => {
   const menuItems = [
     { path: '/legal-consultation', label: 'AI法律咨询', icon: '💬' },
     { path: '/case-analysis', label: '检院案件分析', icon: '⚖️' },
+    { path: '/lawyer-analysis', label: '律师角度分析', icon: '👨‍⚖️' },
     { path: '/case-search', label: '案例搜索', icon: '🔍' },
     { path: '/document-draft', label: '文书生成', icon: '📝' },
     { path: '/contract-review', label: '合同审查', icon: '📋' },
