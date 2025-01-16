@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaComments, FaBalanceScale, FaSearch, FaFileAlt, FaFileContract, FaCog, FaGavel } from 'react-icons/fa';
+import { FaComments, FaSearch, FaFileAlt, FaFileContract, FaCog, FaGavel } from 'react-icons/fa';
 import { BsSunFill, BsMoonFill } from 'react-icons/bs';
 import { MdAutoAwesome } from 'react-icons/md';
 import { IconType } from 'react-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { ThemeMode } from '../../types/theme';
 
 interface NavItem {
   path: string;
@@ -19,23 +21,21 @@ const navItems: NavItem[] = [
   { path: '/contract-review', icon: FaFileContract, label: '合同审查' },
 ];
 
-type Theme = 'auto' | 'light' | 'dark';
-
 interface ThemeOption {
-  value: Theme;
+  value: ThemeMode;
   icon: IconType;
   label: string;
 }
 
 const themeOptions: ThemeOption[] = [
-  { value: 'auto', icon: MdAutoAwesome, label: '自动' },
-  { value: 'light', icon: BsSunFill, label: '浅色' },
-  { value: 'dark', icon: BsMoonFill, label: '深色' },
+  { value: 'default', icon: MdAutoAwesome, label: '默认主题' },
+  { value: 'light', icon: BsSunFill, label: '明亮主题' },
+  { value: 'dark', icon: BsMoonFill, label: '暗黑主题' },
 ];
 
 const Sidebar: React.FC = () => {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<Theme>('auto');
+  const { theme, setThemeMode } = useTheme();
 
   return (
     <nav className="space-y-2">
@@ -47,8 +47,8 @@ const Sidebar: React.FC = () => {
             flex items-center px-4 py-3 rounded-xl text-base font-medium
             transition-all duration-200 relative
             ${isActive 
-              ? 'bg-sky-100 text-sky-700 shadow-[inset_0_1px_1px_rgba(0,0,0,0.1)]' 
-              : 'text-gray-600 hover:bg-sky-50 hover:text-sky-600'}
+              ? `${theme.colors.active} ${theme.colors.text.accent} shadow-[inset_0_1px_1px_rgba(0,0,0,0.1)]` 
+              : `${theme.colors.text.secondary} ${theme.colors.hover}`}
             before:absolute before:inset-0 before:rounded-xl before:shadow-[0_2px_4px_rgba(0,0,0,0.05)]
             hover:before:shadow-[0_4px_8px_rgba(0,0,0,0.1)]
           `}
@@ -62,10 +62,12 @@ const Sidebar: React.FC = () => {
       <div className="relative mt-auto pt-4">
         <button
           onClick={() => setShowThemeMenu(!showThemeMenu)}
-          className="flex items-center w-full px-4 py-3 rounded-xl text-base font-medium
-            text-gray-600 hover:bg-sky-50 hover:text-sky-600 transition-all duration-200
+          className={`
+            flex items-center w-full px-4 py-3 rounded-xl text-base font-medium
+            ${theme.colors.text.secondary} ${theme.colors.hover} transition-all duration-200
             before:absolute before:inset-0 before:rounded-xl before:shadow-[0_2px_4px_rgba(0,0,0,0.05)]
-            hover:before:shadow-[0_4px_8px_rgba(0,0,0,0.1)]"
+            hover:before:shadow-[0_4px_8px_rgba(0,0,0,0.1)]
+          `}
         >
           <FaCog className="w-5 h-5 mr-3 flex-shrink-0" />
           设置
@@ -73,21 +75,23 @@ const Sidebar: React.FC = () => {
 
         {/* 主题选择菜单 */}
         {showThemeMenu && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 bg-white rounded-xl 
-            shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
+          <div className={`
+            absolute bottom-full left-4 right-4 mb-2 ${theme.colors.surface} rounded-xl 
+            shadow-[0_4px_12px_rgba(0,0,0,0.1)] border ${theme.colors.border} overflow-hidden
+          `}>
             {themeOptions.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => {
-                  setCurrentTheme(value);
+                  setThemeMode(value);
                   setShowThemeMenu(false);
                 }}
                 className={`
                   flex items-center w-full px-4 py-3 text-base font-medium
                   transition-colors duration-200
-                  ${currentTheme === value 
-                    ? 'bg-sky-50 text-sky-700' 
-                    : 'text-gray-600 hover:bg-sky-50 hover:text-sky-600'}
+                  ${theme.mode === value 
+                    ? `${theme.colors.active} ${theme.colors.text.accent}` 
+                    : `${theme.colors.text.secondary} ${theme.colors.hover}`}
                 `}
               >
                 <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
