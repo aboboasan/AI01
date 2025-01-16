@@ -6,10 +6,7 @@ import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
 import MobileAnalysisView from '../common/MobileAnalysisView';
 import MobileActionButtons from '../common/MobileActionButtons';
-
-interface ContractReviewProps {
-  // 如果需要props，在这里定义
-}
+import { useTheme } from '../../context/ThemeContext';
 
 const systemMessage: Message = {
   id: 'system',
@@ -85,27 +82,20 @@ const systemMessage: Message = {
 - 合同效力：[判断：有效/待完善/存在重大缺陷]
 - 整体风险：[评估：高/中/低]
 - 签约建议：[给出：可以签署/完善后签署/不建议签署]
-- 重点提示：[列出核心注意事项]
-
-请严格按照上述格式进行分析和输出，确保分析的专业性和建议的可操作性。对于每个部分：
-1. 基于合同文本进行客观分析
-2. 给出明确的问题指出
-3. 提供具体可行的建议
-4. 注意分析的逻辑性和完整性
-
-请分析上传的合同文件，按照此格式输出审查报告。`,
+- 重点提示：[列出核心注意事项]`,
   timestamp: new Date().toISOString()
 };
 
-const ContractReview: React.FC<ContractReviewProps> = () => {
+export const ContractReview: React.FC = () => {
+  const { theme } = useTheme();
   const [file, setFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreviewPage, setShowPreviewPage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 添加移动端检测
   const isMobile = window.innerWidth <= 768;
@@ -221,7 +211,6 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
     setError('');
 
     try {
-      // 使用 chatCompletion 替代 analyzeCaseFile
       const response = await chatCompletion([
         {
           role: 'system',
@@ -295,17 +284,17 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50 p-4">
+    <div className={`min-h-screen ${theme.colors.background}`}>
       {/* 固定在顶部的欢迎区域 */}
-      <div className="bg-gray-50 py-4 px-6 border-b border-gray-100 sticky top-0 z-10">
+      <div className={`${theme.colors.surface} py-4 px-6 border-b ${theme.colors.border} sticky top-0 z-10`}>
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-            <DocumentMagnifyingGlassIcon className="h-8 w-8 text-blue-600" />
+          <div className={`inline-block p-3 ${theme.colors.active} rounded-full mb-4`}>
+            <DocumentMagnifyingGlassIcon className={`h-8 w-8 ${theme.colors.text.accent}`} />
           </div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          <h2 className={`text-lg font-semibold ${theme.colors.text.primary} mb-3`}>
             合同智能审查
           </h2>
-          <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className={`text-sm ${theme.colors.text.secondary} max-w-2xl mx-auto leading-relaxed`}>
             上传合同文件，AI将为您提供专业的合同审查分析、风险识别和修改建议
           </p>
         </div>
@@ -315,7 +304,7 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-6">
           {/* 文件上传区域 */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+          <div className={`${theme.colors.surface} rounded-2xl shadow-sm border ${theme.colors.border} p-6 mb-6`}>
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -324,8 +313,8 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
               className={`
                 relative border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer
                 ${isDragging 
-                  ? 'border-blue-400 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  ? `${theme.colors.active} bg-opacity-50` 
+                  : `${theme.colors.border} hover:border-blue-300 hover:bg-opacity-50`
                 }
                 ${error ? 'border-red-300' : ''}
               `}
@@ -340,20 +329,20 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
               <div className="text-center">
                 {!file ? (
                   <>
-                    <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
-                      <CloudArrowUpIcon className="h-8 w-8 text-gray-400" />
+                    <div className={`inline-block p-3 ${theme.colors.active} rounded-full mb-4`}>
+                      <CloudArrowUpIcon className={`h-8 w-8 ${theme.colors.text.accent}`} />
                     </div>
-                    <div className="text-gray-700 font-medium mb-2 text-sm">
+                    <div className={`${theme.colors.text.primary} font-medium mb-2 text-sm`}>
                       {isDragging ? '释放文件以上传' : '拖拽文件到此处或点击上传'}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className={`text-xs ${theme.colors.text.secondary}`}>
                       支持 .txt、.doc、.docx 格式，最大 20MB
                     </div>
                   </>
                 ) : (
-                  <div className="text-gray-900">
-                    <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                      <DocumentTextIcon className="h-8 w-8 text-blue-600" />
+                  <div className={theme.colors.text.primary}>
+                    <div className={`inline-block p-3 ${theme.colors.active} rounded-full mb-4`}>
+                      <DocumentTextIcon className={`h-8 w-8 ${theme.colors.text.accent}`} />
                     </div>
                     <div className="font-medium mb-2 text-sm">{file.name}</div>
                     <button
@@ -399,12 +388,12 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
               className={`
                 w-full mt-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all
                 ${fileContent && !isAnalyzing
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm'
+                  ? `${theme.colors.active} ${theme.colors.text.accent} shadow-sm hover:shadow-md`
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }
               `}
             >
-      {isAnalyzing ? (
+              {isAnalyzing ? (
                 <>
                   <ArrowPathIcon className="h-5 w-5 animate-spin" />
                   <span className="font-medium text-sm">分析中...</span>
@@ -416,24 +405,32 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
                 </>
               )}
             </button>
-        </div>
+          </div>
 
           {/* 分析结果 */}
           {analysisResult && (
             <>
               {/* 操作按钮组 */}
-              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+              <div className={`sticky top-0 z-20 ${theme.colors.surface} border-b ${theme.colors.border} shadow-sm`}>
                 <div className="max-w-4xl mx-auto px-6 py-2 flex justify-end gap-4">
                   <button
                     onClick={() => setShowPreviewPage(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className={`
+                      flex items-center gap-2 px-4 py-2 text-sm font-medium
+                      ${theme.colors.text.secondary} ${theme.colors.surface} border ${theme.colors.border}
+                      rounded-md hover:${theme.colors.hover}
+                    `}
                   >
                     <EyeIcon className="h-5 w-5" />
                     预览报告
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className={`
+                      flex items-center gap-2 px-4 py-2 text-sm font-medium
+                      ${theme.colors.text.accent} ${theme.colors.active}
+                      border border-transparent rounded-md hover:${theme.colors.hover}
+                    `}
                   >
                     <ArrowDownTrayIcon className="h-5 w-5" />
                     下载报告
@@ -443,11 +440,11 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
 
               {/* 分析结果显示 */}
               <div className="max-w-4xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow-md p-6 mb-12">
+                <div className={`${theme.colors.surface} rounded-lg shadow-md p-6 mb-12`}>
                   <div className="space-y-6">
                     {showPreviewPage ? (
                       // 完整预览模式
-                      <div className="whitespace-pre-wrap text-gray-700">
+                      <div className={`whitespace-pre-wrap ${theme.colors.text.primary}`}>
                         {analysisResult}
                       </div>
                     ) : (
@@ -460,13 +457,13 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
                         const [_, title, content] = titleMatch;
                         
                         return (
-                          <div key={index} className="border border-gray-100 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                          <div key={index} className={`border ${theme.colors.border} rounded-lg p-4 hover:shadow-sm transition-shadow`}>
                             <details open>
                               <summary className="flex items-center mb-4 cursor-pointer">
-                                <div className="w-1 h-6 bg-blue-500 mr-2"></div>
-                                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                                <div className={`w-1 h-6 ${theme.colors.text.accent} mr-2`}></div>
+                                <h3 className={`text-lg font-semibold ${theme.colors.text.primary}`}>{title}</h3>
                               </summary>
-                              <div className="text-sm text-gray-700 whitespace-pre-wrap pl-6 space-y-2">
+                              <div className={`text-sm ${theme.colors.text.secondary} whitespace-pre-wrap pl-6 space-y-2`}>
                                 {content.trim()}
                               </div>
                             </details>
