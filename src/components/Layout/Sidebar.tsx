@@ -13,7 +13,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/legal-consultation', icon: FaComments, label: 'AI法律咨询' },
-  { path: '/case-analysis', icon: FaBalanceScale, label: '检院案件分析' },
   { path: '/lawyer-analysis', icon: FaGavel, label: '律师角度分析' },
   { path: '/case-search', icon: FaSearch, label: '案例搜索' },
   { path: '/document-draft', icon: FaFileAlt, label: '文书生成' },

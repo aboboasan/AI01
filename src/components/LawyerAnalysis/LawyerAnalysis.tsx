@@ -1,86 +1,23 @@
 import React, { useState, useRef } from 'react';
-import { CloudArrowUpIcon, DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowPathIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentMagnifyingGlassIcon, ArrowPathIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { analyzeLawyerCase } from '../../services/api';
 import mammoth from 'mammoth';
-import PreviewPage from '../CaseAnalysis/PreviewPage';
+import PreviewPage from '../common/PreviewPage';
 import MobileAnalysisView from '../common/MobileAnalysisView';
 import MobileActionButtons from '../common/MobileActionButtons';
+import FileUpload from '../common/FileUpload';
+import { FileInfo } from '../../types/file';
 
 const LawyerAnalysis: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [fileContent, setFileContent] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreviewPage, setShowPreviewPage] = useState(false);
 
   // 添加移动端检测
   const isMobile = window.innerWidth <= 768;
-
-  const handleFile = async (selectedFile: File) => {
-    // 检查文件类型
-    const allowedTypes = [
-      'text/plain',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setError('请上传 .txt、.doc 或 .docx 格式的文件');
-      return;
-    }
-
-    // 检查文件大小（限制为 20MB）
-    if (selectedFile.size > 20 * 1024 * 1024) {
-      setError('文件大小不能超过 20MB');
-      return;
-    }
-
-    setFile(selectedFile);
-    setError('');
-    
-    try {
-      const content = await readFileContent(selectedFile);
-      if (typeof content !== 'string' || content.length === 0) {
-        throw new Error('无法读取文件内容');
-      }
-      setFileContent(content);
-    } catch (error) {
-      console.error('读取文件失败:', error);
-      setError(error instanceof Error ? error.message : '文件读取失败，请重试');
-      setFile(null);
-      setFileContent('');
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      await handleFile(droppedFile);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      await handleFile(selectedFile);
-    }
-  };
 
   const readFileContent = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -117,8 +54,33 @@ const LawyerAnalysis: React.FC = () => {
     });
   };
 
+  const handleFileSelect = async (selectedFileInfo: FileInfo) => {
+    setError('');
+    
+    try {
+      const content = await readFileContent(selectedFileInfo.file);
+      if (typeof content !== 'string' || content.length === 0) {
+        throw new Error('无法读取文件内容');
+      }
+      setFileContent(content);
+      setFileInfo(selectedFileInfo);
+    } catch (error) {
+      console.error('读取文件失败:', error);
+      setError(error instanceof Error ? error.message : '文件读取失败，请重试');
+      setFileInfo(null);
+      setFileContent('');
+    }
+  };
+
+  const handleFileRemove = () => {
+    setFileInfo(null);
+    setFileContent('');
+    setAnalysisResult('');
+    setError('');
+  };
+
   const handleAnalyze = async () => {
-    if (!file || !fileContent) {
+    if (!fileInfo || !fileContent) {
       setError('请先上传文件');
       return;
     }
@@ -216,62 +178,13 @@ const LawyerAnalysis: React.FC = () => {
         <div className="max-w-4xl mx-auto p-6">
           {/* 文件上传区域 */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onClick={() => fileInputRef.current?.click()}
-              className={`
-                relative border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer
-                ${isDragging 
-                  ? 'border-blue-400 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                }
-                ${error ? 'border-red-300' : ''}
-              `}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.doc,.docx"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <div className="text-center">
-                {!file ? (
-                  <>
-                    <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
-                      <CloudArrowUpIcon className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <div className="text-gray-700 font-medium mb-2 text-sm">
-                      {isDragging ? '释放文件以上传' : '拖拽文件到此处或点击上传'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      支持 .txt、.doc、.docx 格式，最大 20MB
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-gray-900">
-                    <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                      <DocumentTextIcon className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <div className="font-medium mb-2 text-sm">{file.name}</div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFile(null);
-                        setFileContent('');
-                        setAnalysisResult('');
-                      }}
-                      className="text-sm text-red-600 hover:text-red-500 font-medium"
-                    >
-                      移除文件
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <FileUpload
+              selectedFile={fileInfo}
+              onFileSelect={handleFileSelect}
+              onFileRemove={handleFileRemove}
+              accept=".txt,.doc,.docx"
+              maxSize={20 * 1024 * 1024}
+            />
 
             {error && (
               <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs flex items-center gap-2">
@@ -282,7 +195,7 @@ const LawyerAnalysis: React.FC = () => {
               </div>
             )}
 
-            {file && fileContent && (
+            {fileInfo && fileContent && (
               <div className="mt-4 p-4 bg-green-50 border border-green-100 rounded-xl">
                 <div className="flex items-center gap-2 text-green-700">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

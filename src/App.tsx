@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/Layout/MainLayout';
 import MobileLayout from './components/Layout/MobileLayout';
 import ContentArea from './components/Layout/ContentArea';
-import CaseAnalysis from './components/CaseAnalysis/CaseAnalysis';
 import LawyerAnalysis from './components/LawyerAnalysis';
 import LegalConsultation from './components/LegalConsultation/LegalConsultation';
 import CaseSearch from './components/CaseSearch/CaseSearch';
@@ -41,18 +40,6 @@ const App: React.FC = () => {
               description="智能法律顾问为您提供专业的法律咨询服务，解答您的法律问题。"
             >
               <LegalConsultation />
-            </ContentArea>
-          } 
-        />
-
-        <Route 
-          path="case-analysis" 
-          element={
-            <ContentArea
-              title="检院案件分析"
-              description="上传案件文件，AI将从多个维度进行专业分析，提供详细的案件解析和办案建议。"
-            >
-              <CaseAnalysis />
             </ContentArea>
           } 
         />

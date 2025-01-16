@@ -8,8 +8,7 @@ const MobileLayout: React.FC = () => {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/legal-consultation', label: 'AI法律咨询', icon: '💬' },
-    { path: '/case-analysis', label: '检院案件分析', icon: '⚖️' },
+    { path: '/legal-consultation', label: 'AI法律咨询', icon: '��' },
     { path: '/lawyer-analysis', label: '律师角度分析', icon: '👨‍⚖️' },
     { path: '/case-search', label: '案例搜索', icon: '🔍' },
     { path: '/document-draft', label: '文书生成', icon: '📝' },
