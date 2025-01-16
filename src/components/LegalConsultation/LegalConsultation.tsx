@@ -5,7 +5,7 @@ import MobileChatView from '../Chat/MobileChatView';
 import { Message } from '../../types/chat';
 import { chatCompletion } from '../../services/api';
 
-export const LegalConsultation: React.FC = () => {
+const LegalConsultation: React.FC = () => {
   const systemMessage: Message = {
     id: 'system',
     role: 'system',

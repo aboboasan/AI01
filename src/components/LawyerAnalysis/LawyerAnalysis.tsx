@@ -8,7 +8,7 @@ import MobileActionButtons from '../common/MobileActionButtons';
 import FileUpload from '../common/FileUpload';
 import { FileInfo } from '../../types/file';
 
-export const LawyerAnalysis: React.FC = () => {
+const LawyerAnalysis: React.FC = () => {
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [fileContent, setFileContent] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);

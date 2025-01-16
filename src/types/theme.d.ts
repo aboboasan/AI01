@@ -1,16 +1,18 @@
 export type ThemeMode = 'default' | 'light' | 'dark';
 
 export interface ThemeColors {
+  primary: string;
+  secondary: string;
   background: string;
   surface: string;
-  border: string;
-  active: string;
-  hover: string;
   text: {
     primary: string;
     secondary: string;
     accent: string;
   };
+  border: string;
+  hover: string;
+  active: string;
   gradient: {
     from: string;
     via: string;
@@ -18,12 +20,7 @@ export interface ThemeColors {
   };
 }
 
-export interface Theme {
+export interface ThemeConfig {
   mode: ThemeMode;
   colors: ThemeColors;
-}
-
-export interface ThemeContextType {
-  theme: Theme;
-  setThemeMode: (mode: ThemeMode) => void;
 } 
