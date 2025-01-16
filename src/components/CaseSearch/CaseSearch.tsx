@@ -3,7 +3,7 @@ import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { searchLegalCases } from '../../services/api';
 import type { LegalCase } from '../../services/types';
 
-const CaseSearch: React.FC = () => {
+export const CaseSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<LegalCase[]>([]);
@@ -104,6 +104,4 @@ const CaseSearch: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default CaseSearch; 
+}; 
