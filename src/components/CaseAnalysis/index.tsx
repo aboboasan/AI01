@@ -1,4 +1,4 @@
-import CaseAnalysis from './CaseAnalysis';
+import { CaseAnalysis } from './CaseAnalysis';
 
 export { CaseAnalysis };
 export default CaseAnalysis; 

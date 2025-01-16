@@ -9,7 +9,7 @@ import FileUpload from '../common/FileUpload';
 import { FileInfo } from '../../types/file';
 import { useTheme } from '../../context/ThemeContext';
 
-const CaseAnalysis: React.FC = () => {
+export const CaseAnalysis: React.FC = () => {
   const { theme } = useTheme();
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [fileContent, setFileContent] = useState('');
