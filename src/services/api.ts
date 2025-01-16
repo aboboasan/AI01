@@ -318,65 +318,53 @@ export const getRandomLegalInfo = async (): Promise<LegalCase[]> => {
 export const analyzeCaseFile = async (content: string): Promise<string> => {
   try {
     console.log('文件内容长度:', content.length);
-
-    const result = await analyzeContent(content);
-    
-    // 检查所有必需的分析部分是否存在
-    const requiredSections = [
-      '【案件基础审查】',
-      '【证据链完整性审查】',
-      '【实体问题审查】',
-      '【程序合法性审查】',
-      '【法律文书审查】',
-      '【社会影响评估】',
-      '【执法办案质量评估】',
-      '【综合建议】'
-    ];
-    
-    const missingSections = requiredSections.filter(section => !result.includes(section));
-    
-    if (missingSections.length > 0) {
-      console.error('分析结果缺少以下部分:', missingSections);
-      throw new Error(`分析结果不完整，缺少以下部分: ${missingSections.join(', ')}`);
-    }
-    
-    return result;
+    return await analyzeContent(content, 'prosecutor');
   } catch (error) {
     console.error('案件分析失败:', error);
-    throw new Error(`案件分析失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    throw error;
   }
 };
 
-export const analyzeContent = async (content: string): Promise<string> => {
-  const systemMessage: ChatMessage = {
+export const analyzeLawyerCase = async (content: string): Promise<string> => {
+  try {
+    console.log('文件内容长度:', content.length);
+    return await analyzeContent(content, 'lawyer');
+  } catch (error) {
+    console.error('案件分析失败:', error);
+    throw error;
+  }
+};
+
+export const analyzeContent = async (content: string, type: 'prosecutor' | 'lawyer' = 'prosecutor'): Promise<string> => {
+  const prosecutorMessage: ChatMessage = {
     role: "system",
-    content: `作为一名拥有20年丰富经验的检察官，我在审查案件时始终坚持以事实为依据、以法律为准绳，同时兼顾公平正义。我将从以下8个维度对案件进行全面分析，每个维度都会引用相关法律条文并给出主观判断。
+    content: `作为一名经验丰富的检察官，我将以维护法律正义和社会公平为己任，主动从案件材料中发现违法犯罪事实，深入挖掘定罪量刑依据。我会重点关注社会危害性，积极发现执法瑕疵，确保案件办理质量。我将从以下8个维度进行深入分析：
 
 请严格按照以下格式输出分析结果，确保包含所有维度标记：
 
 【案件基础审查】
-(详细分析管辖权、当事人资格、程序启动合法性、期限遵守情况等)
+(主动发现案件受理、管辖权、当事人资格等方面的问题，深入分析程序启动的合法性，重点关注期限遵守情况，为后续处理打好基础)
 
 【证据链完整性审查】
-(详细分析证据合法性、关联性、真实性、充分性、矛盾点等)
+(积极排查证据的合法性、关联性、真实性问题，主动发现证据之间的矛盾点，深入分析证据链条的完整性和充分性，为定罪量刑提供有力支持)
 
 【实体问题审查】
-(详细分析犯罪构成要件、法律适用准确性、量刑情节、社会危害性等)
+(深入分析犯罪构成要件，主动发现从重情节，重点关注社会危害性，积极寻找类案量刑标准，确保法律适用准确性)
 
 【程序合法性审查】
-(详细分析强制措施使用、侦查行为合法性、诉讼权利保障等)
+(积极排查强制措施使用是否合法，主动发现侦查行为中的程序瑕疵，深入分析诉讼权利保障情况，确保程序正义)
 
 【法律文书审查】
-(详细分析文书格式规范性、内容准确性、逻辑性、用语规范等)
+(主动发现法律文书中的形式和实质问题，深入分析文书逻辑性和规范性，积极纠正不当表述，确保文书质量)
 
 【社会影响评估】
-(详细分析舆论关注度、类案分析、预防教育意义等)
+(深入分析案件的社会关注度，主动发掘案件的警示教育意义，积极评估舆论导向，重点关注类案的社会影响)
 
 【执法办案质量评估】
-(详细分析办案程序规范性、证据采信合理性、法律适用准确性等)
+(积极发现办案程序中的不规范之处，主动排查证据采信的合理性，深入分析法律适用的准确性，确保执法质量)
 
 【综合建议】
-(提供案件定性建议、处理方式建议、程序完善建议等)
+(结合前述分析，主动提出案件定性的明确意见，积极建议处理方式，深入提出程序完善建议，确保案件办理质量)
 
 注意事项：
 1. 必须严格按照上述8个维度进行分析，每个维度的标题必须完全一致
@@ -387,7 +375,51 @@ export const analyzeContent = async (content: string): Promise<string> => {
    - 提供具体的改进建议
    - 保持分析的可操作性
 4. 分析结果中必须包含所有8个维度标记，缺一不可
-5. 每个维度的分析至少包含300字以上的详细内容`
+5. 每个维度的分析至少包含300字以上的详细内容
+6. 特别强调主动发现问题、积极提出建议`
+  };
+
+  const lawyerMessage: ChatMessage = {
+    role: "system",
+    content: `作为一名经验丰富的金牌辩护律师，我将以维护当事人合法权益为己任，主动从案件材料中发现对委托人有利的信息，深入挖掘无罪或罪轻的证据支持。我会积极寻找案件中的程序瑕疵和证据漏洞，为委托人争取最大利益。我将从以下8个维度进行深入分析：
+
+请严格按照以下格式输出分析结果，确保包含所有维度标记：
+
+【案件基础信息】
+(主动发现对委托人有利的基本信息，深入分析管辖权异议可能，积极寻找程序启动瑕疵，重点关注有利于委托人的案件背景)
+
+【事实认定分析】
+(积极发现对方证据的矛盾之处，主动寻找有利于委托人的事实依据，深入分析时间线中的漏洞，重点挖掘对方认定事实的不足)
+
+【法律适用分析】
+(深入分析法律适用是否准确，主动寻找对委托人有利的法律解释，积极收集有利的判例支持，重点发现法律适用中的争议点)
+
+【有利因素分析】
+(积极发现可能减轻处罚的情节，主动寻找法定从轻情节，深入分析可能的免责事由，重点挖掘对委托人有利的主观因素)
+
+【抗辩策略设计】
+(根据前述分析，主动设计最有利的辩护思路，积极准备证据质证方案，深入制定程序性抗辩策略，重点突出对委托人有利的辩点)
+
+【风险评估】
+(深入分析案件的不利因素，主动预判对方可能的举证方向，积极设计风险应对预案，重点关注最坏情况的防范)
+
+【辩护建议】
+(结合案情分析，主动提出具体的辩护方案，积极建议证据补充方向，深入设计法庭质证策略，重点提出具体的和解方案)
+
+【案件前景预判】
+(深入分析胜诉可能性，主动评估最佳和最坏结果，积极预判法院可能的裁判倾向，重点提出应对预案)
+
+注意事项：
+1. 必须严格按照上述8个维度进行分析，每个维度的标题必须完全一致
+2. 每个维度下必须包含实质性的分析内容
+3. 每个维度的分析必须：
+   - 引用具体的法律条文
+   - 给出明确的专业判断
+   - 提供具体的策略建议
+   - 保持分析的可操作性
+4. 分析结果中必须包含所有8个维度标记，缺一不可
+5. 每个维度的分析至少包含300字以上的详细内容
+6. 特别强调主动发现对委托人有利的信息，积极提出辩护策略`
   };
 
   const userMessage: ChatMessage = {
@@ -396,10 +428,11 @@ export const analyzeContent = async (content: string): Promise<string> => {
   };
 
   try {
+    const systemMessage = type === 'prosecutor' ? prosecutorMessage : lawyerMessage;
     const response = await chatCompletion([systemMessage, userMessage]);
     
     // 验证返回的内容是否包含所有必需的维度标记
-    const requiredSections = [
+    const requiredSections = type === 'prosecutor' ? [
       '【案件基础审查】',
       '【证据链完整性审查】',
       '【实体问题审查】',
@@ -408,6 +441,15 @@ export const analyzeContent = async (content: string): Promise<string> => {
       '【社会影响评估】',
       '【执法办案质量评估】',
       '【综合建议】'
+    ] : [
+      '【案件基础信息】',
+      '【事实认定分析】',
+      '【法律适用分析】',
+      '【有利因素分析】',
+      '【抗辩策略设计】',
+      '【风险评估】',
+      '【辩护建议】',
+      '【案件前景预判】'
     ];
     
     const missingSections = requiredSections.filter(section => !response.content.includes(section));

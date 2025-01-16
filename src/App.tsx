@@ -4,6 +4,7 @@ import MainLayout from './components/Layout/MainLayout';
 import MobileLayout from './components/Layout/MobileLayout';
 import ContentArea from './components/Layout/ContentArea';
 import CaseAnalysis from './components/CaseAnalysis/CaseAnalysis';
+import LawyerAnalysis from './components/LawyerAnalysis';
 import LegalConsultation from './components/LegalConsultation/LegalConsultation';
 import CaseSearch from './components/CaseSearch/CaseSearch';
 import DocumentDraft from './components/DocumentDraft/DocumentDraft';
@@ -52,6 +53,18 @@ const App: React.FC = () => {
               description="上传案件文件，AI将从多个维度进行专业分析，提供详细的案件解析和办案建议。"
             >
               <CaseAnalysis />
+            </ContentArea>
+          } 
+        />
+
+        <Route 
+          path="lawyer-analysis" 
+          element={
+            <ContentArea
+              title="律师角度分析"
+              description="资深律师为您从辩护角度分析案件，挖掘有利因素，制定最佳法律策略。"
+            >
+              <LawyerAnalysis />
             </ContentArea>
           } 
         />
