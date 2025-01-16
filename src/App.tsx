@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './context/ThemeContext';
 import MainLayout from './components/Layout/MainLayout';
 import MobileLayout from './components/Layout/MobileLayout';
-import LegalConsultation from './components/LegalConsultation';
-import CaseAnalysis from './components/CaseAnalysis';
-import LawyerAnalysis from './components/LawyerAnalysis';
-import CaseSearch from './components/CaseSearch';
-import DocumentDraft from './components/DocumentDraft';
-import ContractReview from './components/ContractReview';
+import { LegalConsultation } from './components/LegalConsultation/LegalConsultation';
+import { CaseAnalysis } from './components/CaseAnalysis/CaseAnalysis';
+import { LawyerAnalysis } from './components/LawyerAnalysis/LawyerAnalysis';
+import { CaseSearch } from './components/CaseSearch/CaseSearch';
+import { DocumentDraft } from './components/DocumentDraft/DocumentDraft';
+import { ContractReview } from './components/ContractReview/ContractReview';
 import { useMediaQuery } from 'react-responsive';
 
 const App: React.FC = () => {
