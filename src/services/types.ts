@@ -6,16 +6,13 @@ export interface Message {
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
 export interface ChatResponse {
-  content: string;
-  choices?: Array<{
-    message?: {
-      content: string;
-    };
+  choices: Array<{
+    message: ChatMessage;
   }>;
 }
 
@@ -28,8 +25,8 @@ export interface LegalCase {
   type: string;
   result: string;
   reference: string;
-  location: string;
-  caseType: string;
+  location?: string;
+  caseType?: string;
   summary: string;
   url: string;
 } 

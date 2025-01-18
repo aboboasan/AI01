@@ -88,13 +88,4 @@ export interface ContractReviewResult {
   rightsObligations: RightsObligationsAnalysis;
   suggestions: Suggestion[];
   overallRisk: RiskLevel;
-}
-
-// 文件信息
-export interface FileInfo {
-  file: File;
-  name: string;
-  size: number;
-  type: string;
-  lastModified: string;
 } 

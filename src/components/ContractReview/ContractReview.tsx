@@ -6,6 +6,7 @@ import mammoth from 'mammoth';
 import PreviewPage from './PreviewPage';
 import MobileAnalysisView from '../common/MobileAnalysisView';
 import MobileActionButtons from '../common/MobileActionButtons';
+import { FileInfo } from '../../types/file';
 
 interface ContractReviewProps {
   // 如果需要props，在这里定义
@@ -98,407 +99,282 @@ const systemMessage: Message = {
 };
 
 const ContractReview: React.FC<ContractReviewProps> = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState('');
+  const [file, setFile] = useState<FileInfo | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
+  const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showPreviewPage, setShowPreviewPage] = useState(false);
 
-  // 添加移动端检测
-  const isMobile = window.innerWidth <= 768;
-
-  const handleFile = async (selectedFile: File) => {
-    // 检查文件类型
-    const allowedTypes = [
-      'text/plain',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setError('请上传 .txt、.doc 或 .docx 格式的文件');
-      return;
-    }
-
-    // 检查文件大小（限制为 20MB）
-    if (selectedFile.size > 20 * 1024 * 1024) {
-      setError('文件大小不能超过 20MB');
-      return;
-    }
-
-    setFile(selectedFile);
-    setError('');
-    
-    try {
-      const content = await readFileContent(selectedFile);
-      if (typeof content !== 'string' || content.length === 0) {
-        throw new Error('无法读取文件内容');
-      }
-      setFileContent(content);
-    } catch (error) {
-      console.error('读取文件失败:', error);
-      setError(error instanceof Error ? error.message : '文件读取失败，请重试');
-      setFile(null);
-      setFileContent('');
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      await handleFile(droppedFile);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      await handleFile(selectedFile);
+      setFile({
+        file: selectedFile,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        type: selectedFile.type,
+        uploadTime: new Date().toLocaleString()
+      });
+      setAnalysisResult('');
     }
   };
 
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      // 处理不同类型的文件
-      if (file.type === 'text/plain') {
-        // 文本文件直接读取
-        reader.onload = (e) => {
-          resolve(e.target?.result as string);
-        };
-        reader.onerror = (e) => {
-          reject(new Error('读取文本文件失败'));
-        };
-        reader.readAsText(file);
-      } else if (
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-        file.type === 'application/msword'
-      ) {
-        // Word 文档需要特殊处理
-        reader.onload = async (e) => {
-          try {
-            const arrayBuffer = e.target?.result as ArrayBuffer;
-            const result = await mammoth.extractRawText({ arrayBuffer });
-            resolve(result.value);
-          } catch (error) {
-            reject(new Error('读取 Word 文档失败'));
-          }
-        };
-        reader.onerror = (e) => {
-          reject(new Error('读取 Word 文档失败'));
-        };
-        reader.readAsArrayBuffer(file);
-      } else {
-        reject(new Error('不支持的文件格式'));
-      }
-    });
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    if (droppedFile) {
+      setFile({
+        file: droppedFile,
+        name: droppedFile.name,
+        size: droppedFile.size,
+        type: droppedFile.type,
+        uploadTime: new Date().toLocaleString()
+      });
+      setAnalysisResult('');
+    }
   };
 
-  const handleAnalyze = async () => {
-    if (!file || !fileContent) {
-      setError('请先上传文件');
-      return;
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const extractTextFromFile = async (file: File): Promise<string> => {
+    if (file.type === 'application/pdf') {
+      // 处理PDF文件
+      // 这里需要实现PDF文本提取逻辑
+      return ''; // 临时返回空字符串
+    } else if (
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.type === 'application/msword'
+    ) {
+      // 处理Word文档
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      return result.value;
+    } else if (file.type === 'text/plain') {
+      // 处理纯文本文件
+      return await file.text();
+    } else {
+      throw new Error('不支持的文件格式');
     }
+  };
+
+  const analyzeContract = async () => {
+    if (!file) return;
 
     setIsAnalyzing(true);
-    setError('');
-
     try {
-      // 使用 chatCompletion 替代 analyzeCaseFile
-      const response = await chatCompletion([
+      const text = await extractTextFromFile(file.file);
+      const messages: Message[] = [
+        systemMessage,
         {
-          role: 'system',
-          content: systemMessage.content
-        },
-        {
+          id: 'user',
           role: 'user',
-          content: `请对以下合同进行分析：\n\n${fileContent}`
+          content: text,
+          timestamp: new Date().toISOString()
         }
-      ]);
+      ];
 
-      if (!response.content.includes('【合同基本信息】')) {
-        throw new Error('分析结果格式不符合要求，请重试');
-      }
-
+      const response = await chatCompletion(messages);
       setAnalysisResult(response.content);
     } catch (error) {
       console.error('合同分析失败:', error);
-      setError(error instanceof Error ? error.message : '合同分析失败，请重试');
+      setAnalysisResult('合同分析失败，请重试。');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handlePreview = () => {
-    if (analysisResult) {
-      setShowPreviewPage(true);
-    }
-  };
-
-  const handleDownload = () => {
+  const downloadAnalysis = () => {
     if (!analysisResult) return;
-    
+
     const blob = new Blob([analysisResult], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = '合同审查报告.txt';
+    link.download = `合同分析报告_${new Date().toLocaleDateString()}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
   };
 
-  if (showPreviewPage && analysisResult) {
-    return (
-      <PreviewPage
-        content={analysisResult}
-        onBack={() => setShowPreviewPage(false)}
-      />
-    );
-  }
+  const resetAnalysis = () => {
+    setFile(null);
+    setAnalysisResult('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
-  if (analysisResult && isMobile) {
-    return (
-      <>
-        <MobileAnalysisView
-          title="合同审查"
-          description="AI智能分析合同条款，识别潜在风险"
-          content={analysisResult}
-          onBack={() => setAnalysisResult('')}
-        />
-        <MobileActionButtons
-          onPreview={handlePreview}
-          onDownload={handleDownload}
-          showPreview={!!analysisResult}
-          showDownload={!!analysisResult}
-        />
-      </>
-    );
+  const mobileActions = [
+    {
+      icon: <CloudArrowUpIcon className="w-6 h-6" />,
+      label: '上传合同',
+      onClick: () => fileInputRef.current?.click(),
+    },
+    {
+      icon: <DocumentMagnifyingGlassIcon className="w-6 h-6" />,
+      label: '开始分析',
+      onClick: analyzeContract,
+      disabled: !file || isAnalyzing,
+    },
+    {
+      icon: <ArrowPathIcon className="w-6 h-6" />,
+      label: '重新开始',
+      onClick: resetAnalysis,
+      disabled: !file,
+    },
+    {
+      icon: <ArrowDownTrayIcon className="w-6 h-6" />,
+      label: '下载报告',
+      onClick: downloadAnalysis,
+      disabled: !analysisResult,
+    },
+  ];
+
+  if (showPreview) {
+    return <PreviewPage content={analysisResult} onBack={() => setShowPreview(false)} />;
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50 p-4">
-      {/* 固定在顶部的欢迎区域 */}
-      <div className="bg-gray-50 py-4 px-6 border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-            <DocumentMagnifyingGlassIcon className="h-8 w-8 text-blue-600" />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            合同智能审查
-          </h2>
-          <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            上传合同文件，AI将为您提供专业的合同审查分析、风险识别和修改建议
-          </p>
-        </div>
+    <div className="h-full">
+      <div className="lg:hidden">
+        <MobileAnalysisView
+          file={file}
+          isAnalyzing={isAnalyzing}
+          analysisResult={analysisResult}
+          onFileSelect={handleFileChange}
+          fileInputRef={fileInputRef}
+        />
+        <MobileActionButtons actions={mobileActions} />
       </div>
 
-      {/* 可滚动的内容区域 */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-6">
-          {/* 文件上传区域 */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onClick={() => fileInputRef.current?.click()}
-              className={`
-                relative border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer
-                ${isDragging 
-                  ? 'border-blue-400 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                }
-                ${error ? 'border-red-300' : ''}
-              `}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.doc,.docx"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <div className="text-center">
-                {!file ? (
-                  <>
-                    <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
-                      <CloudArrowUpIcon className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <div className="text-gray-700 font-medium mb-2 text-sm">
-                      {isDragging ? '释放文件以上传' : '拖拽文件到此处或点击上传'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      支持 .txt、.doc、.docx 格式，最大 20MB
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-gray-900">
-                    <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                      <DocumentTextIcon className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <div className="font-medium mb-2 text-sm">{file.name}</div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFile(null);
-                        setFileContent('');
-                        setAnalysisResult('');
-                      }}
-                      className="text-sm text-red-600 hover:text-red-500 font-medium"
-                    >
-                      移除文件
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs flex items-center gap-2">
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            {file && fileContent && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-100 rounded-xl">
-                <div className="flex items-center gap-2 text-green-700">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="font-medium">文件已成功读取，可以开始分析</span>
+      <div className="hidden lg:flex h-full space-x-6">
+        {/* 左侧面板：文件上传区域 */}
+        <div className="w-1/2 flex flex-col space-y-4">
+          <div
+            className="flex-1 border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center space-y-4"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
+            {!file ? (
+              <>
+                <DocumentTextIcon className="w-16 h-16 text-gray-400" />
+                <div className="text-center">
+                  <p className="text-gray-600">拖拽文件到这里，或者</p>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-blue-500 hover:text-blue-600 font-medium"
+                  >
+                    点击上传
+                  </button>
                 </div>
-              </div>
+                <p className="text-sm text-gray-500">支持 PDF、Word、TXT 格式</p>
+              </>
+            ) : (
+              <>
+                <DocumentTextIcon className="w-12 h-12 text-blue-500" />
+                <div className="text-center">
+                  <p className="font-medium text-gray-900">{file.name}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    大小：{(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    上传时间：{file.uploadTime}
+                  </p>
+                </div>
+              </>
             )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleFileChange}
+            />
+          </div>
 
+          {/* 操作按钮 */}
+          <div className="flex space-x-4">
             <button
-              onClick={handleAnalyze}
-              disabled={!fileContent || isAnalyzing}
-              className={`
-                w-full mt-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all
-                ${fileContent && !isAnalyzing
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }
-              `}
+              onClick={analyzeContract}
+              disabled={!file || isAnalyzing}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-white ${
+                !file || isAnalyzing
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
             >
-      {isAnalyzing ? (
+              {isAnalyzing ? (
                 <>
-                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                  <span className="font-medium text-sm">分析中...</span>
+                  <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                  分析中...
                 </>
               ) : (
                 <>
-                  <DocumentMagnifyingGlassIcon className="h-5 w-5" />
-                  <span className="font-medium text-sm">开始分析</span>
+                  <DocumentMagnifyingGlassIcon className="w-5 h-5 mr-2" />
+                  开始分析
                 </>
               )}
             </button>
+            <button
+              onClick={resetAnalysis}
+              disabled={!file}
+              className={`px-4 py-2 rounded-lg ${
+                !file
+                  ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                  : 'text-gray-600 bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              <ArrowPathIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-          {/* 分析结果 */}
-          {analysisResult && (
-            <>
-              {/* 操作按钮组 */}
-              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
-                <div className="max-w-4xl mx-auto px-6 py-2 flex justify-end gap-4">
-                  <button
-                    onClick={() => setShowPreviewPage(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <EyeIcon className="h-5 w-5" />
-                    预览报告
-                  </button>
-                  <button
-                    onClick={handleDownload}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <ArrowDownTrayIcon className="h-5 w-5" />
-                    下载报告
-                  </button>
-                </div>
+        {/* 右侧面板：分析结果 */}
+        <div className="w-1/2 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900">分析结果</h2>
+            {analysisResult && (
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+                >
+                  <EyeIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={downloadAnalysis}
+                  className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+                >
+                  <ArrowDownTrayIcon className="w-5 h-5" />
+                </button>
               </div>
-
-              {/* 分析结果显示 */}
-              <div className="max-w-4xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow-md p-6 mb-12">
-                  <div className="space-y-6">
-                    {showPreviewPage ? (
-                      // 完整预览模式
-                      <div className="whitespace-pre-wrap text-gray-700">
-                        {analysisResult}
-                      </div>
-                    ) : (
-                      // 折叠面板模式
-                      analysisResult.split('【').map((section, index) => {
-                        if (index === 0) return null;
-                        // 改进分割逻辑，确保完整获取内容
-                        const titleMatch = section.match(/([^】]+)】([\s\S]+)$/);
-                        if (!titleMatch) return null;
-                        const [_, title, content] = titleMatch;
-                        
-                        return (
-                          <div key={index} className="border border-gray-100 rounded-lg p-4 hover:shadow-sm transition-shadow">
-                            <details open>
-                              <summary className="flex items-center mb-4 cursor-pointer">
-                                <div className="w-1 h-6 bg-blue-500 mr-2"></div>
-                                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                              </summary>
-                              <div className="text-sm text-gray-700 whitespace-pre-wrap pl-6 space-y-2">
-                                {content.trim()}
-                              </div>
-                            </details>
-                          </div>
-                        );
-                      })
-                    )}
+            )}
+          </div>
+          <div className="flex-1 overflow-auto">
+            {analysisResult ? (
+              <div className="prose prose-sm max-w-none">
+                <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                  {analysisResult}
+                </pre>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-500">
+                {isAnalyzing ? (
+                  <div className="flex items-center space-x-2">
+                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                    <span>正在分析合同，请稍候...</span>
                   </div>
-                </div>
+                ) : (
+                  <span>上传合同文件开始分析</span>
+                )}
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
-
-      {/* 移动端操作按钮 */}
-      {isMobile && analysisResult && (
-        <MobileActionButtons
-          onPreview={handlePreview}
-          onDownload={handleDownload}
-          showPreview={!!analysisResult}
-          showDownload={!!analysisResult}
-        />
-      )}
-
-      {/* 预览页面 */}
-      {showPreviewPage && (
-        <PreviewPage
-          content={analysisResult}
-          onBack={() => setShowPreviewPage(false)}
-        />
-      )}
     </div>
   );
 };
