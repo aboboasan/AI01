@@ -1,15 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "CI=false npm run build",
+  "buildCommand": "npm install --legacy-peer-deps && CI=false NODE_OPTIONS=--max_old_space_size=4096 npm run build",
   "devCommand": "npm start",
-  "installCommand": "npm install --legacy-peer-deps",
   "framework": "create-react-app",
   "builds": [
     {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "build"
+        "distDir": "build",
+        "maxLambdaSize": "15mb"
       }
     }
   ],

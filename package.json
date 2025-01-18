@@ -13,6 +13,7 @@
     "axios": "^1.6.5",
     "caniuse-lite": "^1.0.30001692",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "mammoth": "^1.9.0",
@@ -33,7 +34,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096 GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build",
+    "build": "DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -79,7 +80,6 @@
     "@types/react-window-infinite-loader": "^1.0.9",
     "autoprefixer": "^10.4.16",
     "babel-loader": "^9.2.1",
-    "cross-env": "^7.0.3",
     "html-webpack-plugin": "^5.6.3",
     "postcss": "^8.4.33",
     "react-refresh": "^0.14.0",
