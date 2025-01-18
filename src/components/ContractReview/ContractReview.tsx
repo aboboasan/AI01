@@ -252,9 +252,11 @@ const ContractReview: React.FC<ContractReviewProps> = () => {
           analysisResult={analysisResult}
           onFileSelect={handleFileChange}
           onPreview={() => setShowPreview(true)}
+          onAnalyze={analyzeContract}
+          onReset={resetAnalysis}
+          onDownload={downloadAnalysis}
           fileInputRef={fileInputRef}
         />
-        <MobileActionButtons actions={mobileActions} />
       </div>
 
       <div className="hidden lg:flex h-full space-x-6">

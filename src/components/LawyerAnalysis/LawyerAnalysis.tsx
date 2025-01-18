@@ -152,9 +152,11 @@ const LawyerAnalysis: React.FC = () => {
           analysisResult={analysisResult}
           onFileSelect={handleFileChange}
           onPreview={() => setShowPreview(true)}
+          onAnalyze={analyzeLawyer}
+          onReset={resetAnalysis}
+          onDownload={downloadAnalysis}
           fileInputRef={fileInputRef}
         />
-        <MobileActionButtons actions={mobileActions} />
       </div>
 
       <div className="hidden lg:flex h-full space-x-6">
