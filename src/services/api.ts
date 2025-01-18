@@ -73,7 +73,7 @@ export const chatCompletion = async (messages: ChatMessage[]): Promise<{ content
     console.log('开始API调用，发送消息:', JSON.stringify(messages, null, 2));
     
     const response = await withRetry(() => 
-      api.post<ChatResponse>('/v1/chat/completions', {
+      api.post<ChatResponse>('/chat/completions', {
         model: 'deepseek-chat',
         messages,
         temperature: 0.7,
