@@ -1,13 +1,13 @@
 import React, { RefObject } from 'react';
-import { Disclosure } from '@headlessui/react';
-import { ChevronUpIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import { FileInfo } from '../../types/file';
+import { CloudArrowUpIcon, DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 interface MobileAnalysisViewProps {
   file: FileInfo | null;
   isAnalyzing: boolean;
   analysisResult: string;
-  onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileSelect: (file: File) => void;
+  onPreview: () => void;
   fileInputRef: RefObject<HTMLInputElement>;
 }
 
@@ -16,119 +16,129 @@ const MobileAnalysisView: React.FC<MobileAnalysisViewProps> = ({
   isAnalyzing,
   analysisResult,
   onFileSelect,
+  onPreview,
   fileInputRef,
 }) => {
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
       {/* 标题区域 */}
-      <div className="px-4 py-3 bg-white border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">律师角度分析</h2>
-        <p className="mt-1 text-sm text-gray-500">
+      <div className="p-4 bg-white dark:bg-gray-800 shadow-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">律师角度分析</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           资深律师为您从辩护角度分析案件，挖掘有利因素，制定最佳法律策略。
         </p>
       </div>
 
-      {/* 文件上传区域 */}
-      <div className="px-4 py-3">
-        <div 
-          className={`p-4 rounded-lg border ${
-            file ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'
-          } flex items-center space-x-3 shadow-sm`}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept=".pdf,.doc,.docx,.txt"
-            onChange={onFileSelect}
-          />
-          
-          <div className="flex-shrink-0">
-            <CloudArrowUpIcon className={`w-8 h-8 ${file ? 'text-blue-500' : 'text-gray-400'}`} />
+      {/* 主要内容区域 */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {!file && !analysisResult && (
+          <div
+            className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <CloudArrowUpIcon className="w-12 h-12 text-gray-400" />
+            <p className="mt-2 text-sm text-gray-500">点击上传案件文件</p>
+            <p className="text-xs text-gray-400">支持 PDF、Word、文本文件</p>
           </div>
-          
-          <div className="flex-1 min-w-0">
-            {file ? (
-              <>
-                <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-                <div className="mt-1 flex items-center text-xs text-gray-500 space-x-2">
-                  <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                  <span>•</span>
-                  <span>{file.uploadTime}</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-medium text-gray-900">点击上传案件文件</p>
-                <p className="text-xs text-gray-500 mt-0.5">支持 PDF、Word、TXT 格式</p>
-              </>
-            )}
+        )}
+
+        {file && !analysisResult && (
+          <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <h3 className="font-medium text-gray-900 dark:text-white">已选择文件</h3>
+            <div className="mt-2 text-sm text-gray-500">
+              <p>文件名：{file.name}</p>
+              <p>大小：{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              <p>上传时间：{new Date(file.uploadTime).toLocaleString()}</p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {analysisResult && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="p-4">
+              <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+                {analysisResult}
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {isAnalyzing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-2 text-sm text-gray-500">正在分析案件，预计需要1-2分钟...</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 分析结果 */}
-      {analysisResult && (
-        <div className="flex-1 px-4 py-3 overflow-auto">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <Disclosure defaultOpen>
-              {({ open }) => (
-                <>
-                  <Disclosure.Button className="flex justify-between items-center w-full px-4 py-3 text-left text-gray-900 bg-gray-50 hover:bg-gray-100">
-                    <div>
-                      <span className="font-medium">分析结果</span>
-                      <span className="ml-2 text-sm text-gray-500">点击展开/收起</span>
-                    </div>
-                    <ChevronUpIcon
-                      className={`${
-                        open ? 'transform rotate-180' : ''
-                      } w-5 h-5 text-gray-500`}
-                    />
-                  </Disclosure.Button>
-                  <Disclosure.Panel className="p-4">
-                    <div className="prose prose-sm max-w-none">
-                      <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm">
-                        {analysisResult}
-                      </pre>
-                    </div>
-                  </Disclosure.Panel>
-                </>
-              )}
-            </Disclosure>
-          </div>
-        </div>
-      )}
+      {/* 底部操作按钮 */}
+      <div className="grid grid-cols-5 gap-1 p-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <button
+          className="flex flex-col items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <CloudArrowUpIcon className="w-6 h-6" />
+          <span className="text-xs mt-1">上传案件</span>
+        </button>
+        
+        <button
+          className="flex flex-col items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+          onClick={onPreview}
+          disabled={!file}
+        >
+          <DocumentMagnifyingGlassIcon className="w-6 h-6" />
+          <span className="text-xs mt-1">预览</span>
+        </button>
 
-      {/* 加载状态 */}
-      {isAnalyzing && (
-        <div className="flex-1 flex items-center justify-center bg-white bg-opacity-90">
-          <div className="flex flex-col items-center px-4 py-8">
-            <svg
-              className="animate-spin h-8 w-8 mb-3 text-blue-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            <p className="text-gray-600">正在分析案件，请稍候...</p>
-            <p className="mt-1 text-sm text-gray-500">预计需要1-2分钟</p>
-          </div>
-        </div>
-      )}
+        <button
+          className="flex flex-col items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+          onClick={() => {/* 开始分析 */}}
+          disabled={!file || isAnalyzing}
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-xs mt-1">开始分析</span>
+        </button>
+
+        <button
+          className="flex flex-col items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+          onClick={() => {/* 重新开始 */}}
+          disabled={!analysisResult}
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span className="text-xs mt-1">重新开始</span>
+        </button>
+
+        <button
+          className="flex flex-col items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+          onClick={() => {/* 下载报告 */}}
+          disabled={!analysisResult}
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span className="text-xs mt-1">下载报告</span>
+        </button>
+      </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept=".pdf,.doc,.docx,.txt"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            onFileSelect(file);
+          }
+        }}
+      />
     </div>
   );
 };
