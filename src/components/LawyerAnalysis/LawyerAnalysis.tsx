@@ -14,16 +14,16 @@ const LawyerAnalysis: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      setFile({
-        file: selectedFile,
-        name: selectedFile.name,
-        size: selectedFile.size,
-        type: selectedFile.type,
-        uploadTime: new Date().toLocaleString()
-      });
+  const handleFileChange = (file: File) => {
+    if (file) {
+      const fileInfo: FileInfo = {
+        file,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadTime: new Date().toISOString()
+      };
+      setFile(fileInfo);
       setAnalysisResult('');
     }
   };
@@ -106,6 +106,13 @@ const LawyerAnalysis: React.FC = () => {
     }
   };
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      handleFileChange(selectedFile);
+    }
+  };
+
   const mobileActions = [
     {
       icon: <CloudArrowUpIcon className="w-6 h-6" />,
@@ -144,6 +151,7 @@ const LawyerAnalysis: React.FC = () => {
           isAnalyzing={isAnalyzing}
           analysisResult={analysisResult}
           onFileSelect={handleFileChange}
+          onPreview={() => setShowPreview(true)}
           fileInputRef={fileInputRef}
         />
         <MobileActionButtons actions={mobileActions} />
@@ -190,7 +198,7 @@ const LawyerAnalysis: React.FC = () => {
               type="file"
               className="hidden"
               accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileChange}
+              onChange={handleInputChange}
             />
           </div>
 
